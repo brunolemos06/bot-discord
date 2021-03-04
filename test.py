@@ -22,8 +22,6 @@ async def on_ready():
   await channel.send("AYE IM IN THE MAINFRAME SON LEZ GE'IT")
   
 
-  
-
 @client.event    #Message handler
 async def on_message(msg):
   
@@ -72,7 +70,7 @@ async def dice(ctx):
 
 @client.command(brief='Saudações amigão') #Boas jovem
 async def ola (ctx):
-    await ctx.send(f'Olá, {ctx.author}  :nerd:')
+    await ctx.send(f'Olá, {ctx.author.mention}  :nerd:')
 
 @client.command(brief='Recebe ganda conselho') #Concelho master
 async def conselho(ctx):
