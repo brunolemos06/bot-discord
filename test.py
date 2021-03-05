@@ -6,19 +6,19 @@ import random
 from discord.ext import commands
 import emoji
 import asyncio
-from randomMessages import msgPositiva, msgNegativa
+from randomMessages import randomline
 import time
 import youtube_dl
 
 dotenv_path = join(dirname(__file__),'.env')
 load_dotenv(dotenv_path)
 TOKEN_KEY = os.environ.get("TOKEN")
-
+listgalo = []
 client = commands.Bot(command_prefix = "#", case_insensitive = True)
 channel = client.get_channel(816788040215298065)
+
+
 #EVENTOS
-
-
 @client.event    #IM IN SON
 async def on_ready():
   print('Entramos como {0.user}' .format(client))
@@ -52,29 +52,36 @@ async def on_message(msg):
 @client.command(brief='Connect BOTMOCS para bombar GUITZ')
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def guita(ctx):
-    url = randomGuita()
+    url = randomline("guitz.txt")
     try:
+        song_there = os.path.isfile("song.mp3")
+        try:
+            if song_there:
+                os.remove("song.mp3")
+        except PermissionError:
+            await ctx.send("Espera caralho")
         canal = ctx.message.author.voice.channel
         await canal.connect()
-        #voice = get(client.voice_clients, guild=ctx.guild)
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        for file in os.listdir("./"):
+            if file.endswith(".mp3"):
+                os.rename(file, "song.mp3")
+        canal.play(discord.FFmpegExtractAudio("song.mp3"))
+        
     except AttributeError:
         await ctx.send("Tens de estar dentro de um VoiceChannel camelo")
     except:
         await ctx.send("O BOTMOCS está um pouquinho ocupado noutro channel")
-
-def randomGuita():
-        linhas = sum(1 for line in open('guitz.txt', encoding="utf8"))
-        pos = random.randint(0,linhas-1)    # inteiro
-        f = open("guitz.txt", "r", encoding="utf8")
-        novastring =""
-        for position, str in enumerate(f):
-        
-            if position < pos:
-                novastring = str
-            else:
-                f.close()
-                return novastring      
-        return 
   
 ####################----DC channel voice--------#############
 @client.command(brief='Disconnect BOTMOCS from channel')
@@ -88,14 +95,13 @@ async def dc(ctx):
             await ctx.send("Tens que estar no mesmo canal que o BOT MOCS YA")
     except AttributeError:
         await ctx.send("O BOT MOCS NÃO ESTÁ EM NENHUM CHANNEL")
+
 ############################----GALO----#########################
 @client.command(brief = 'Jogo do galo')
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def galo(ctx):
-    try:
-        if(ctx.author == player1 or ctx.author == player2):
-            return await ctx.send("Já estás dentro de um jogo lerdo")
-    except:
+    if(listgalo.count(ctx.author) > 0):
+        return await ctx.send("Já estás no meio de um jogo, acaba o jogo ou desiste")
     player1 = ctx.author
     if(ctx.message.content.lower() == "#galo"): #sem tagar ninguem
         msg = await ctx.send(f"Quem quer jogar ao galo com {player1.mention}")
@@ -136,13 +142,16 @@ async def galo(ctx):
             await msg.add_reaction(certo)
             reaction, player2 = await client.wait_for('reaction_add', check = checkReaction, timeout=10.0)
         except asyncio.TimeoutError:
-            return await ctx.send("Too long fool")
+            return await ctx.send("Ninguém quer jogar contigo zeca :(")
     else:                                          # errado
-        await ctx.send("usar: #galo @mention  ou apenas #galo")
-        return
+        return await ctx.send("usar: #galo @mention  ou apenas #galo")
     
-
+    
     ############----COMEÇA A JOGAR O JOGO DO GALO ----############
+    if(listgalo.count(player2) >0):
+        return await ctx.send(f"{player2.mention} já estás no meio de um jogo, acaba o jogo ou desiste")
+    listgalo.append(player1)
+    listgalo.append(player2)
     await ctx.send(f"JOGO DO GALO : {player1.mention} vs {player2.mention}")
     # await ctx.send("Utilizar numeros de 1 a 9 para jogar")
     simbplayer1 = "🟢"
@@ -179,18 +188,27 @@ async def galo(ctx):
                         numjogadas = numjogadas + 1
                         await print_galo(array,current_player.mention, ctx)
                 except ValueError:
-                    await ctx.send("Jogada inválida, introduzir numeros de 1 a 9")
+                    if(play.content != "#galo"):
+                        await ctx.send("Jogada inválida, introduzir numeros de 1 a 9")
                     await print_galo(array,current_player.mention, ctx)
-            else:   
+            else:
+                listgalo.remove(player1)
+                listgalo.remove(player2) 
                 if(current_player == player1):
-                    return await ctx.send(f"Vencedor {player2.mention}, " + msgPositiva().lower())
+                    return await ctx.send(f"Vencedor {player2.mention}, " + randomline("msgsPositivas.txt").lower())
                 elif(current_player == player2):
-                    return await ctx.send(f"Vencedor {player1.mention}, " + msgPositiva().lower())
+                    return await ctx.send(f"Vencedor {player1.mention}, " + randomline("msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==1):
-            return await ctx.send(f"Vencedor {player1.mention}, " + msgPositiva().lower())
+            listgalo.remove(player1)
+            listgalo.remove(player2) 
+            return await ctx.send(f"Vencedor {player1.mention}, " + randomline("msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==2):
-            return await ctx.send(f"Vencedor {player2.mention}, " + msgPositiva().lower())
+            listgalo.remove(player1)
+            listgalo.remove(player2) 
+            return await ctx.send(f"Vencedor {player2.mention}, " + randomline("msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==0):
+            listgalo.remove(player1)
+            listgalo.remove(player2) 
             return await ctx.send(f"Empate entre {player1.mention} e {player2.mention}, Tentem de novo!!!")      
 def check_end_galo(array,numjogadas):
     #return 0 empate
@@ -292,10 +310,10 @@ async def dice(ctx):
         
         if (guess.content.isdigit()):
             if(int(guess.content) == answer):
-                frase = msgPositiva()
+                frase = randomline("msgsPositivas.txt")
                 return await ctx.send(frase) 
             else:
-                frase = msgNegativa()
+                frase = randomline("msgsPositivas.txt")
                 return await ctx.send(frase)
         else:
             return await ctx.send(f"{ctx.author.mention} isso não é um numero nabo")
