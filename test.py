@@ -348,4 +348,9 @@ def randIspira():
             return novastring
     return "Não há mais inspiração para ti"
 
+#################----ping----#####################~
+@client.command(brief='ping do BOTMOCS') #Concelho master
+async def ping(ctx):
+    await ctx.send(f'**Ping??** **Pong!** Latency: {round(client.latency * 1000)}ms')
+
 client.run(TOKEN_KEY) 
