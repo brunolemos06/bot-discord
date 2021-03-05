@@ -29,7 +29,7 @@ async def on_message(msg):
             await msg.channel.send("LMAOOOO :smile:")
         if "love" in msg.content.lower():
             await msg.channel.send("Thats kinda gay ngl")
-        if ('caralho' in msg.content.lower() or 'merda' in msg.content.lower()):
+        if ('caralho' in msg.content.lower() or 'merda' in msg.content.lower() or 'foda-se' in msg.content.lower() or 'puta' in msg.content.lower()):
             await msg.channel.send("NAO DIGAS ASNEIRAS NESTE DISCORD CARALHO, ESTAS TODO TURBINADO")
         await  client.process_commands(msg)
 
@@ -84,11 +84,11 @@ async def galo(ctx):                                                #GANDA JOGO 
         return
     
 
-    #começa o jogo entre player1 e player2
+    ############----COMEÇA A JOGAR O JOGO DO GALO ----############
     await ctx.send(f"JOGO DO GALO : {player1.mention} vs {player2.mention}")
     # await ctx.send("Utilizar numeros de 1 a 9 para jogar")
-    simbplayer1 = '🟢'
-    simbplayer2 = '❌'
+    simbplayer1 = "🟢"
+    simbplayer2 = "❌"
     array = init_galo()
     
     await print_galo(array,player1.mention, ctx)
@@ -98,67 +98,89 @@ async def galo(ctx):                                                #GANDA JOGO 
     def jogadorCerto(m):
         return m.author == current_player
 
-    while not check_end_galo(array,numjogadas):
-        play = await client.wait_for('message', check=jogadorCerto)
-        print(play.content)
-        if not play:
-            await ctx.send("Jogador errado ó nabo!")        
-        if not check_empty_pos_galo(array, (int)play.content-1):
-            await ctx.send("Jogada inválida!")
-        
-        jogada = play.content
-        x = jogada/3
-        y = jogada%3
-        if current_player == jogador1:
-            array[x][y] = simbplayer1
-            current_player = jogador2
-        elif current_player == jogador2:
-            array[x][y] = simbplayer2
-            current_player = jogador1
-        else:
-            print("Jogador Inválido")
-        numjogadas = numjogadas + 1
-        await print_galo(array,current_player.mention, ctx)
+    while True :
+        if(check_end_galo(array,numjogadas)== -1 and ctx.author.id != 816787135825838090): # continue
+            print("jogada tipo 1")
+            play = await client.wait_for('message', check=jogadorCerto)
+            try:
+                jogada = int(play.content)-1
+                if not jogadorCerto:
+                    await ctx.send("Jogador errado ó nabo!")        
+                if not check_empty_pos_galo(array,jogada):
+                    await ctx.send("Jogada inválida!")
+                    await print_galo(array,current_player.mention, ctx)
+                else:
+                    x = int(jogada/3)
+                    y = int(jogada%3)
+                    if current_player == player1:
+                        array[x][y] = simbplayer1
+                        current_player = player2
+                    elif current_player == player2:
+                        array[x][y] = simbplayer2
+                        current_player = player1
+                    else:
+                        print("Jogador Inválido")
+                    numjogadas = numjogadas + 1
+                    await print_galo(array,current_player.mention, ctx)
+            except TypeError:
+                await ctx.send("Jogada inválida, introduzir numeros de 0 a 8")
+        elif(check_end_galo(array,numjogadas)==1):
+            return await ctx.send(f"Vencedor {player1.mention}, Parabéns!!!")
+        elif(check_end_galo(array,numjogadas)==2):
+            return await ctx.send(f"Vencedor {player2.mention}, Parabéns!!!")
+        elif(check_end_galo(array,numjogadas)==0):
+            return await ctx.send(f"Empate entre {player1.mention} e {player2.mention}, Tentem de novo!!!")
         
 
         
 
 def check_end_galo(array,numjogadas):
-    
-    end = False
-    if numjogadas == 9:
-        return True
-    if(array[0][0] == array[0][1] == array[0][2]) and array[0][0]!="⬛":
-        end = True
-    elif(array[1][0] == array[2][1] == array[1][2]and array[1][0]!="⬛"):
-        end = True
+    #return 0 empate
+    #return 1 player1 win
+    #return 2 player 2 win
+    #return -1 continue
+    end = -1
+    if(array[0][0] == array[0][1] == array[0][2]  and array[0][0]!="⬛"):
+        end = getjogada(array,0,0)
+    elif(array[1][0] == array[1][1] == array[1][2]and array[1][0]!="⬛"):
+        end = getjogada(array,1,0)
     elif(array[2][0] == array[2][1] == array[2][2]and array[2][0]!="⬛"):
-        end = True
+        end = getjogada(array,2,0)
     elif(array[0][0] == array[1][0] == array[2][0]and array[0][0]!="⬛"):
-        end = True
+        end = getjogada(array,0,0)
     elif(array[0][1] == array[1][1] == array[2][1]and array[0][1]!="⬛"):
-        end = True
+        end = getjogada(array,0,1)
     elif(array[0][2] == array[1][2] == array[2][2]and array[0][2]!="⬛"):
-        end = True
+        end = getjogada(array,0,2)
     elif(array[0][0] == array[1][1] == array[2][2]and array[0][0]!="⬛"):
-        end = True
+        end = getjogada(array,0,0)
     elif(array[0][2] == array[1][1] == array[2][0]and array[0][2]!="⬛"):
-        end = True
+        end = getjogada(array,0,2)
+    elif numjogadas == 9:
+        return 0
     return end
 
+def getjogada(array,x,y):
+    if array[x][y] == '🟢':
+        return 1
+    elif array[x][y] == '❌':
+        return 2
+    else:
+        return print("Erro interno")
+
 def check_empty_pos_galo(array, pos):
-    # x = pos/3;
-    # y = pos%3;
-    if(array[pos/3,pos%3] == "⬛"):
+    x = int(pos/3)
+    y = int(pos%3)
+    if(array[x][y] == '⬛'):
         return True
-    return false
+    return False
 
 def init_galo():
     n = 3
     array = [[0] * n for i in range(n)]
     for i in range(n):
         for j in range(n):
-            array[i][j] = "⬛"
+            array[i][j] = '⬛'
     return array
 
 async def print_galo(array, jogador, ctx):
