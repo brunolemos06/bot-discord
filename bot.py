@@ -163,7 +163,7 @@ async def galo(ctx):
     if(listgalo.count(ctx.author) > 0):
         return await ctx.send("Já estás no meio de um jogo, acaba o jogo ou desiste")
     player1 = ctx.author
-    if(ctx.message.content.lower() == "#galo"): #sem tagar ninguem
+    if(ctx.message.content.lower() == (prefix+"galo")): #sem tagar ninguem
         msg = await ctx.send(f"Quem quer jogar ao galo com {player1.mention}")
         
         def checkReaction(reaction, player2):
