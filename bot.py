@@ -3,28 +3,37 @@ import os
 from os.path import join,dirname
 import discord
 import random
-from discord.ext import commands, tasks
+from discord.ext import tasks,commands
 import emoji
 import asyncio
 from randomMessages import randomline
 import time
 import youtube_dl
 from discord.voice_client import VoiceClient
+from music import playmusic
+from requests import get
+from youtube_dl import YoutubeDL
+from discord import FFmpegPCMAudio
+from discord.utils import get
+from asyncio import sleep
+
 
 dotenv_path = join(dirname(__file__),'.env')
 load_dotenv(dotenv_path)
 TOKEN_KEY = os.environ.get("TOKEN")
 listgalo = []
-client = commands.Bot(command_prefix = "#", case_insensitive = True)
-channel = client.get_channel(816788040215298065)
+prefix = "$"
+client = commands.Bot(command_prefix = prefix, case_insensitive = True)
+channel = client.get_channel(817878165325611069)
+
 
 
 #EVENTOS
 @client.event    #IM IN SON
 async def on_ready():
-  print('Entramos como {0.user}' .format(client))
-  channel = client.get_channel(816788040215298065)
-  await channel.send("BOT ESTÁ ONLINE :green_circle:")
+    print('BotMOCS está online: {0.user}' .format(client))
+    #channel = client.get_channel(817878165325611069)
+    #await channel.send("BOT ESTÁ ONLINE :green_circle:")
 
 @client.event    #Message handler
 async def on_message(msg):
@@ -44,16 +53,27 @@ async def on_message(msg):
             await message.add_reaction(emoji)
             emoji = '\N{DOUGHNUT}'
             await message.add_reaction(emoji)
+        if ('cona' in msg.content.lower() or 'penis' in msg.content.lower() or 'pila' in msg.content.lower() or 'vagina' in msg.content.lower() or 'pipi' in msg.content.lower() or 'dick' in msg.content.lower() or 'pussy' in msg.content.lower() or 'piça' in msg.content.lower()) :
+            await msg.channel.send("ESTÁS COM FALTA DE PENIS OU DE CONA HMMMM ?")
+        if  '<@!816787135825838090>' == msg.content :
+            embed = discord.Embed(title="Settings for this server",description = f" -> The prefix is **{prefix}**",color = discord.Colour.green())
+            embed.set_thumbnail(url = client.user.avatar_url)
+            embed.set_footer(text="Enjoy our amazing BOTMOCS e fica com a maior moca de todos os tempos !!!")
+            await msg.channel.send(embed=embed)
+        if "#concelho" == msg.content:
+            await msg.channel.send("CHE GANDA BURRO NAO É assim que se pede um conselho YA")
         await  client.process_commands(msg)
 
 
 #COMANDOS
 
-###############----GUITA----####################
-@client.command(brief='Connect BOTMOCS para bombar GUITZ', help='Connect BOTMOCS para bombar GUITZ')
-@commands.cooldown(1, 2, commands.BucketType.user)
-async def guita(ctx):
-    url = randomline("guitz.txt")
+###############----PLAY ANYTHING----################
+@client.command(brif="TOCA O QUE quiseres bro", help="Eu toco para ti o que tu quiseres lido")
+@commands.cooldown(1,5,commands.BucketType.user)
+async def p(ctx, *, query):
+    #Solves a problem I'll explain later
+    FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+
     if not ctx.message.author.voice:
         await ctx.send("Tens que tar conectado a um VoiceChannel BARRAQUEIRO YA")
         return
@@ -62,14 +82,65 @@ async def guita(ctx):
         channel = ctx.message.author.voice.channel
     await channel.connect()
 
-    server = ctx.message.guild
-    voice_channel = server.voice_client
+    video, source = search(query)
+    voice = get(client.voice_clients, guild=ctx.guild)
 
-    async with ctx.typing():
-        player = await YTDLSource.from_url(url, loop=client.loop)
-        voice_channel.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+    msg = "Now playing: " + str(video['title'])
+    await ctx.send(msg)
+    voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
+    while(voice.is_playing()):
+        await sleep(1)
+    timer = 0
+    while(not voice.is_playing()):
+        await sleep(1)
+        timer = timer + 1
+        if(timer == 60):
+            await ctx.send("Não tava a tocar nada por isso bazei")
+            await voice.disconnect()
+            break
+  
+def search(arg):
+    with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
+        try: requests.get(arg)
+        except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
+        else: info = ydl.extract_info(arg, download=False)
+    return (info, info['formats'][0]['url'])
 
-    await ctx.send('**TOCANDO: ** {}'.format(player.title))
+###############----PROFILE-----#####################
+@client.command(brief='Procurar perfil')
+@commands.cooldown(1,2, commands.BucketType.user)
+async def profile(ctx):
+    try:
+        member = ctx.message.mentions[0]
+        embed = discord.Embed(title = member.name,description = member.mention, color = discord.Colour.red())
+        embed.add_field(name = "Name", value = member.name, inline = True)
+        embed.add_field(name = "TopRole", value = member.top_role, inline = True)
+        embed.set_thumbnail(url = member.avatar_url)
+        embed.set_footer(icon_url = ctx.author.avatar_url, text = f"Request by {ctx.author.name}")
+        await ctx.send(embed = embed)
+    except:
+        return await ctx.send("Introduz um mention valido | usar : #profile @mention")
+
+###############----CREDITOS----#####################
+@client.command(brief='Creditos da malta por trás do MOCS YA', help='Mostra os cérebros por trás deste grande MOCS')
+@commands.cooldown(1,2, commands.BucketType.user)
+async def creditos(ctx):
+     embed = discord.Embed(title="Créditos",description = "Cérebros por trás do BOTMOCS", color = discord.Colour.red())
+     embed.set_thumbnail(url="https://cdn.jornaldebrasilia.com.br/wp-content/uploads/2019/07/cerebro-1000x600.jpg")
+     embed.add_field(name="Programadores: ", value='\u200b', inline=True)
+     embed.add_field(name="João Amaral", value ='<@366292034669248514>', inline=True)
+     embed.add_field(name="Bruno Lemos", value ='<@431857111018897409>', inline=True)
+     embed.add_field(name="Honorable Mentions: ", value='\u200b', inline=True)
+     embed.add_field(name="Pedro Rocha", value ='<@539520976577363981>', inline=True)
+     embed.add_field(name="André Clérigo", value ='<@239323719300939776>', inline=True)
+     await ctx.send(embed=embed)
+
+###############----GUITA----####################
+@client.command(brief='Connect BOTMOCS para bombar GUITZ', help='Connect BOTMOCS para bombar GUITZ')
+@commands.cooldown(1, 2, commands.BucketType.user)
+async def guita(ctx):
+    url = randomline("guitz.txt")
+    return await playmusic(url,ctx,client)
   
 ####################----DC channel voice--------#############
 @client.command(brief='Disconnect BOTMOCS from channel')
@@ -79,7 +150,7 @@ async def dc(ctx):
         if ctx.author.voice.channel and ctx.author.voice.channel == ctx.voice_client.channel:
             server = ctx.message.guild.voice_client
             await server.disconnect()
-            await ctx.send("Cya")
+            await ctx.send("XAU")
         else:
             await ctx.send("Tens que estar no mesmo canal que o BOT MOCS YA")
     except AttributeError:
@@ -110,7 +181,6 @@ async def galo(ctx):
             if(player1 == player2):
                 await ctx.send("Jogo do Galo : não podes jogar contigo mesmo lul")
                 return
-            #print("Siga nessa vanessa 1") 
 
 
     elif ctx.message.mentions: # com tag
@@ -270,15 +340,18 @@ async def coin(ctx):
     else:
         return await ctx.message.add_reaction(coroa)
 
-###########----DISCONNECT----#############  
+###########----OFF----#############  
 @client.command(brief='shut down BOT MOCS') #Disconnect
 async def off(ctx):
     # amaral e bruno autorizados
     if(ctx.author.id == 431857111018897409 or ctx.author.id == 366292034669248514):
         await ctx.send("BOT MOCS OFFLINE 🔴")
         server = ctx.message.guild.voice_client
-        await server.disconnect()
-        await client.logout()
+        try:
+            await server.disconnect()
+            await client.logout()
+        except:
+            a = 0
     else:
         await ctx.send("Não tens acesso a este codigo bem potente")
 
@@ -302,90 +375,25 @@ async def dice(ctx):
                 frase = randomline("msgsPositivas.txt")
                 return await ctx.send(frase) 
             else:
-                frase = randomline("msgsPositivas.txt")
+                frase = randomline("msgsNegativas.txt")
                 return await ctx.send(frase)
         else:
             return await ctx.send(f"{ctx.author.mention} isso não é um numero nabo")
-
 
 #############----hello----################
 @client.command(brief='Saudações amigão') #Boas jovem
 async def hello(ctx):
     await ctx.send(f'Olá, {ctx.author.mention}  :nerd:')
 
-# @client.hello.command
-# async def cagada(ctx):
-#     await ctx.send("SUBCOMANDO CAGADA")
-
-############----CONCELHO----#################
+############----CONS(C)ELHO----#################
 @client.command(brief='Recebe ganda conselho') #Concelho master
 async def conselho(ctx):
-    await ctx.send(randIspira())
-def randIspira():
-    linhas = sum(1 for line in open('messages.txt', encoding="utf8"))
-    pos = random.randint(0,linhas-1)    # inteiro
-    f = open("messages.txt", "r", encoding="utf8")
-    novastring=""
-    print(pos)
-    for position, str in enumerate(f):
-      
-        if position < pos:
-            novastring = str
-        else:
-            #print(position)
-            f.close()
-            return novastring
-    return "Não há mais inspiração para ti"
+    frase = randomline("messages.txt")
+    return await ctx.send(frase)
 
 #################----ping----#####################~
 @client.command(brief='ping do BOTMOCS') #Concelho master
 async def ping(ctx):
     await ctx.send(f'**Ping??** **Pong!** Latency: {round(client.latency * 1000)}ms')
-
-
-youtube_dl.utils.bug_reports_message = lambda: ''
-
-ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
-}
-
-ffmpeg_options = {
-    'options': '-vn'
-}
-
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-
-class YTDLSource(discord.PCMVolumeTransformer):
-    def __init__(self, source, *, data, volume=0.5):
-        super().__init__(source, volume)
-
-        self.data = data
-
-        self.title = data.get('title')
-        self.url = data.get('url')
-
-    @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False):
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
-
-        filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
-
-
 
 client.run(TOKEN_KEY) 
