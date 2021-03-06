@@ -60,13 +60,12 @@ async def on_message(msg):
             embed.set_thumbnail(url = client.user.avatar_url)
             embed.set_footer(text="Enjoy our amazing BOTMOCS e fica com a maior moca de todos os tempos !!!")
             await msg.channel.send(embed=embed)
-        if "#concelho" == msg.content:
+        if (prefix+"concelho") == msg.content:
             await msg.channel.send("CHE GANDA BURRO NAO É assim que se pede um conselho YA")
         await  client.process_commands(msg)
 
 
 #COMANDOS
-
 ###############----PLAY ANYTHING----################
 @client.command(brif="TOCA O QUE quiseres bro", help="Eu toco para ti o que tu quiseres lido")
 @commands.cooldown(1,5,commands.BucketType.user)
@@ -98,7 +97,6 @@ async def p(ctx, *, query):
             await ctx.send("Não tava a tocar nada por isso bazei")
             await voice.disconnect()
             break
-  
 def search(arg):
     with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
         try: requests.get(arg)
@@ -119,7 +117,8 @@ async def profile(ctx):
         embed.set_footer(icon_url = ctx.author.avatar_url, text = f"Request by {ctx.author.name}")
         await ctx.send(embed = embed)
     except:
-        return await ctx.send("Introduz um mention valido | usar : #profile @mention")
+        msg = "Introduz um mention valido | usar : "+prefix+"profile @mention"
+        return await ctx.send(msg)
 
 ###############----CREDITOS----#####################
 @client.command(brief='Creditos da malta por trás do MOCS YA', help='Mostra os cérebros por trás deste grande MOCS')
@@ -130,7 +129,7 @@ async def creditos(ctx):
      embed.add_field(name="Programadores: ", value='\u200b', inline=True)
      embed.add_field(name="João Amaral", value ='<@366292034669248514>', inline=True)
      embed.add_field(name="Bruno Lemos", value ='<@431857111018897409>', inline=True)
-     embed.add_field(name="Honorable Mentions: ", value='\u200b', inline=True)
+     embed.add_field(name="Agradecimentos: ", value='\u200b', inline=True)
      embed.add_field(name="Pedro Rocha", value ='<@539520976577363981>', inline=True)
      embed.add_field(name="André Clérigo", value ='<@239323719300939776>', inline=True)
      await ctx.send(embed=embed)
@@ -150,7 +149,7 @@ async def dc(ctx):
         if ctx.author.voice.channel and ctx.author.voice.channel == ctx.voice_client.channel:
             server = ctx.message.guild.voice_client
             await server.disconnect()
-            await ctx.send("XAU")
+            #await ctx.send("XAU")
         else:
             await ctx.send("Tens que estar no mesmo canal que o BOT MOCS YA")
     except AttributeError:
@@ -202,7 +201,8 @@ async def galo(ctx):
             reaction, player2 = await client.wait_for('reaction_add', check = checkReaction, timeout=10.0)
         except asyncio.TimeoutError:
             return await ctx.send("Ninguém quer jogar contigo zeca :(")
-    else:                                          # errado
+    else:
+        msg = "usar: "+prefix+"galo @mention  ou apenas "+prefix+"galo"                         # errado
         return await ctx.send("usar: #galo @mention  ou apenas #galo")
     
     
@@ -212,7 +212,6 @@ async def galo(ctx):
     listgalo.append(player1)
     listgalo.append(player2)
     await ctx.send(f"JOGO DO GALO : {player1.mention} vs {player2.mention}")
-    # await ctx.send("Utilizar numeros de 1 a 9 para jogar")
     simbplayer1 = "🟢"
     simbplayer2 = "❌"
     array = init_galo()
@@ -247,7 +246,7 @@ async def galo(ctx):
                         numjogadas = numjogadas + 1
                         await print_galo(array,current_player.mention, ctx)
                 except ValueError:
-                    if(play.content != "#galo"):
+                    if(play.content != (prefix+"galo")):
                         await ctx.send("Jogada inválida, introduzir numeros de 1 a 9")
                     await print_galo(array,current_player.mention, ctx)
             else:
@@ -383,7 +382,11 @@ async def dice(ctx):
 #############----hello----################
 @client.command(brief='Saudações amigão') #Boas jovem
 async def hello(ctx):
-    await ctx.send(f'Olá, {ctx.author.mention}  :nerd:')
+    try:
+        member = ctx.message.mentions[0]
+        await ctx.send(f'Olá, {member.mention}  :nerd:')
+    except:
+        await ctx.send(f'Olá, {ctx.author.mention}  :nerd:')
 
 ############----CONS(C)ELHO----#################
 @client.command(brief='Recebe ganda conselho') #Concelho master
