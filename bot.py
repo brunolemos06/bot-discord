@@ -3,7 +3,7 @@ import os
 from os.path import join,dirname
 import discord
 import random
-from discord.ext import commands, tasks
+from discord.ext import tasks,commands
 import emoji
 import asyncio
 from randomMessages import randomline
@@ -11,6 +11,12 @@ import time
 import youtube_dl
 from discord.voice_client import VoiceClient
 from music import playmusic
+from requests import get
+from youtube_dl import YoutubeDL
+from discord import FFmpegPCMAudio
+from discord.utils import get
+from asyncio import sleep
+
 
 dotenv_path = join(dirname(__file__),'.env')
 load_dotenv(dotenv_path)
@@ -45,6 +51,8 @@ async def on_message(msg):
             await message.add_reaction(emoji)
             emoji = '\N{DOUGHNUT}'
             await message.add_reaction(emoji)
+        if ('cona' in msg.content.lower() or 'penis' in msg.content.lower() or 'pila' in msg.content.lower() or 'vagina' in msg.content.lower() or 'pipi' in msg.content.lower() or 'dick' in msg.content.lower() or 'pussy' in msg.content.lower() or 'piça' in msg.content.lower()) :
+            await msg.channel.send("ESTÁS COM FALTA DE PENIS OU DE CONA HMMMM ?")
         if '<@&816788308402241598>' == msg.content or '<@!816787135825838090>' == msg.content :
             embed = discord.Embed(title="Settings for this server",description = " -> The prefix is **#**",color = discord.Colour.green())
             embed.set_thumbnail(url = client.user.avatar_url)
@@ -54,26 +62,69 @@ async def on_message(msg):
             await msg.channel.send("CHE GANDA BURRO NAO É assim que se pede um conselho YA")
         await  client.process_commands(msg)
 
+@client.event  
+async def on_member_join(member):
+    print("WELCOME MACACAO")
+
 
 #COMANDOS
 
 ###############----PLAY ANYTHING----################
 @client.command(brif="TOCA O QUE quiseres bro", help="Eu toco para ti o que tu quiseres lido")
-@commands.cooldown(1,2,commands.BucketType.user)
-async def p(ctx, url):
-    return await playmusic(url, ctx, client)
+@commands.cooldown(1,5,commands.BucketType.user)
+async def p(ctx, *, query):
+    #Solves a problem I'll explain later
+    FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
+    if not ctx.message.author.voice:
+        await ctx.send("Tens que tar conectado a um VoiceChannel BARRAQUEIRO YA")
+        return
+    
+    else:
+        channel = ctx.message.author.voice.channel
+    await channel.connect()
+
+    video, source = search(query)
+    voice = get(client.voice_clients, guild=ctx.guild)
+
+    msg = "Now playing: " + str(video['title'])
+    await ctx.send(msg)
+    #lambda e: print('done', e)
+    voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
+    while(voice.is_playing()):
+        await sleep(1)
+    timer = 0
+    while(not voice.is_playing()):
+        await sleep(1)
+        timer = timer + 1
+        if(timer == 60):
+            await ctx.send("Não tava a tocar nada por isso bazei")
+            await voice.disconnect()
+            break
+
+    
+
+def search(arg):
+    with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
+        try: requests.get(arg)
+        except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
+        else: info = ydl.extract_info(arg, download=False)
+    return (info, info['formats'][0]['url'])
 
 ###############----PROFILE-----#####################
 @client.command(brief='Procurar perfil')
 @commands.cooldown(1,2, commands.BucketType.user)
-async def profile(ctx, member : discord.Member):
-    embed = discord.Embed(title = member.name,description = member.mention, color = discord.Colour.red())
-    embed.add_field(name = "Name", value = member.name, inline = True)
-    embed.add_field(name = "TopRole", value = member.top_role, inline = True)
-    embed.set_thumbnail(url = member.avatar_url)
-    embed.set_footer(icon_url = ctx.author.avatar_url, text = f"Request by {ctx.author.name}")
-    await ctx.send(embed = embed)
+async def profile(ctx):
+    try:
+        member = ctx.message.mentions[0]
+        embed = discord.Embed(title = member.name,description = member.mention, color = discord.Colour.red())
+        embed.add_field(name = "Name", value = member.name, inline = True)
+        embed.add_field(name = "TopRole", value = member.top_role, inline = True)
+        embed.set_thumbnail(url = member.avatar_url)
+        embed.set_footer(icon_url = ctx.author.avatar_url, text = f"Request by {ctx.author.name}")
+        await ctx.send(embed = embed)
+    except:
+        return await ctx.send("Introduz um mention valido | usar : #profile @mention")
 
 ###############----CREDITOS----#####################
 @client.command(brief='Creditos da malta por trás do MOCS YA', help='Mostra os cérebros por trás deste grande MOCS')
@@ -104,7 +155,7 @@ async def dc(ctx):
         if ctx.author.voice.channel and ctx.author.voice.channel == ctx.voice_client.channel:
             server = ctx.message.guild.voice_client
             await server.disconnect()
-            await ctx.send("Cya")
+            await ctx.send("XAU")
         else:
             await ctx.send("Tens que estar no mesmo canal que o BOT MOCS YA")
     except AttributeError:
@@ -330,7 +381,7 @@ async def dice(ctx):
                 frase = randomline("msgsPositivas.txt")
                 return await ctx.send(frase) 
             else:
-                frase = randomline("msgsPositivas.txt")
+                frase = randomline("msgsNegativas.txt")
                 return await ctx.send(frase)
         else:
             return await ctx.send(f"{ctx.author.mention} isso não é um numero nabo")
