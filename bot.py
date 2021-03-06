@@ -22,15 +22,17 @@ dotenv_path = join(dirname(__file__),'.env')
 load_dotenv(dotenv_path)
 TOKEN_KEY = os.environ.get("TOKEN")
 listgalo = []
-client = commands.Bot(command_prefix = "#", case_insensitive = True)
-channel = client.get_channel(816788040215298065)
+prefix = "$"
+client = commands.Bot(command_prefix = prefix, case_insensitive = True)
+channel = client.get_channel(817878165325611069)
+
 
 
 #EVENTOS
 @client.event    #IM IN SON
 async def on_ready():
     print('BotMOCS está online: {0.user}' .format(client))
-    #channel = client.get_channel(816788040215298065)
+    #channel = client.get_channel(817878165325611069)
     #await channel.send("BOT ESTÁ ONLINE :green_circle:")
 
 @client.event    #Message handler
@@ -53,18 +55,14 @@ async def on_message(msg):
             await message.add_reaction(emoji)
         if ('cona' in msg.content.lower() or 'penis' in msg.content.lower() or 'pila' in msg.content.lower() or 'vagina' in msg.content.lower() or 'pipi' in msg.content.lower() or 'dick' in msg.content.lower() or 'pussy' in msg.content.lower() or 'piça' in msg.content.lower()) :
             await msg.channel.send("ESTÁS COM FALTA DE PENIS OU DE CONA HMMMM ?")
-        if '<@&816788308402241598>' == msg.content or '<@!816787135825838090>' == msg.content :
-            embed = discord.Embed(title="Settings for this server",description = " -> The prefix is **#**",color = discord.Colour.green())
+        if  '<@!816787135825838090>' == msg.content :
+            embed = discord.Embed(title="Settings for this server",description = f" -> The prefix is **{prefix}**",color = discord.Colour.green())
             embed.set_thumbnail(url = client.user.avatar_url)
             embed.set_footer(text="Enjoy our amazing BOTMOCS e fica com a maior moca de todos os tempos !!!")
             await msg.channel.send(embed=embed)
         if "#concelho" == msg.content:
             await msg.channel.send("CHE GANDA BURRO NAO É assim que se pede um conselho YA")
         await  client.process_commands(msg)
-
-@client.event  
-async def on_member_join(member):
-    print("WELCOME MACACAO")
 
 
 #COMANDOS
@@ -89,7 +87,6 @@ async def p(ctx, *, query):
 
     msg = "Now playing: " + str(video['title'])
     await ctx.send(msg)
-    #lambda e: print('done', e)
     voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
     while(voice.is_playing()):
         await sleep(1)
@@ -101,9 +98,7 @@ async def p(ctx, *, query):
             await ctx.send("Não tava a tocar nada por isso bazei")
             await voice.disconnect()
             break
-
-    
-
+  
 def search(arg):
     with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
         try: requests.get(arg)
@@ -186,7 +181,6 @@ async def galo(ctx):
             if(player1 == player2):
                 await ctx.send("Jogo do Galo : não podes jogar contigo mesmo lul")
                 return
-            #print("Siga nessa vanessa 1") 
 
 
     elif ctx.message.mentions: # com tag
@@ -396,9 +390,6 @@ async def hello(ctx):
 async def conselho(ctx):
     frase = randomline("messages.txt")
     return await ctx.send(frase)
-
-
-
 
 #################----ping----#####################~
 @client.command(brief='ping do BOTMOCS') #Concelho master
