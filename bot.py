@@ -22,6 +22,8 @@ dotenv_path = join(dirname(__file__),'.env')
 load_dotenv(dotenv_path)
 TOKEN_KEY = os.environ.get("TOKEN")
 listgalo = []
+listmusics =[]
+listtitles = []
 prefix = "$"
 client = commands.Bot(command_prefix = prefix, case_insensitive = True)
 channel = client.get_channel(817878165325611069)
@@ -66,9 +68,25 @@ async def on_message(msg):
 
 
 #COMANDOS
+<<<<<<< Updated upstream
+=======
+
+##############----QUEUE----################
+@client.command(brief="Mosta a queue de musicas a bombar", help="Lista de musicas prontas para bombar")
+@commands.cooldown(1,3,commands.BucketType.user)
+async def queue(ctx):
+    embed = discord.Embed(title="Queue de músicas",description = "Lista de músicas na fila", color = discord.Colour.purple())
+    embed.set_thumbnail(url="https://www.creativefabrica.com/wp-content/uploads/2019/02/Music-Icon-by-Kanggraphic-1-580x386.jpg")
+    counter = 0
+    for x in listtitles:
+        counter = counter + 1
+        embed.add_field(name=str(counter), value=str(x), inline=False)
+    await ctx.send(embed=embed)
+
+>>>>>>> Stashed changes
 ###############----PLAY ANYTHING----################
-@client.command(brif="TOCA O QUE quiseres bro", help="Eu toco para ti o que tu quiseres lido")
-@commands.cooldown(1,5,commands.BucketType.user)
+@client.command(brief="TOCA O QUE quiseres bro", help="Eu toco para ti o que tu quiseres lido")
+@commands.cooldown(1,2,commands.BucketType.user)
 async def p(ctx, *, query):
     #Solves a problem I'll explain later
     FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
@@ -79,30 +97,62 @@ async def p(ctx, *, query):
     
     else:
         channel = ctx.message.author.voice.channel
-    await channel.connect()
-
+    try:
+        await channel.connect()
+    except:
+        print("ja ca estava dentro mas vou por a tocar")
     video, source = search(query)
     voice = get(client.voice_clients, guild=ctx.guild)
 
-    msg = "Now playing: " + str(video['title'])
-    await ctx.send(msg)
-    voice.play(FFmpegPCMAudio(source, **FFMPEG_OPTS), after=lambda e: print('done', e))
-    while(voice.is_playing()):
-        await sleep(1)
+    url = FFmpegPCMAudio(source, **FFMPEG_OPTS)
+    msg = "Adicionada à queue:" + str(video['title'])
+    embed = discord.Embed(title=msg,description ='\u200b', color = discord.Colour.orange())
+    await ctx.send(embed=embed)
+
+    #verifica se ja tem musicas na queue, adicionando se ja tiver
+    if(len(listmusics)!=0):
+        listmusics.append(url)
+        listtitles.append(str(video['title']))
+    #se nao tiver, cria uma queue e põe a bombar
+    else:
+        listmusics.append(url)
+        listtitles.append(str(video['title']))
+        await play_next(voice, url, ctx)
+
     timer = 0
     while(not voice.is_playing()):
         await sleep(1)
         timer = timer + 1
-        if(timer == 60):
-            await ctx.send("Não tava a tocar nada por isso bazei")
+        if(timer == 480 and voice and voice.is_connected()):
+            await ctx.send("Musica : Não tava a tocar nada por isso bazei")
             await voice.disconnect()
             break
+<<<<<<< Updated upstream
+=======
+
+async def play_next(voice, url, ctx):
+    print(len(listmusics))
+    while len(listmusics) != 0:
+        print("vou tocar")
+        voice.play(listmusics[0], after=lambda e:print('done', e))
+        atual = "Now playing: " + listtitles[0]
+        embed = discord.Embed(title=atual,description ='\u200b', color = discord.Colour.orange())
+        await ctx.send(embed=embed)
+        while(voice.is_playing()):
+            await sleep(1)
+        listmusics.remove(listmusics[0])
+        listtitles.remove(listtitles[0])
+
+>>>>>>> Stashed changes
 def search(arg):
     with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
         try: requests.get(arg)
         except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
         else: info = ydl.extract_info(arg, download=False)
     return (info, info['formats'][0]['url'])
+
+
+
 
 ###############----PROFILE-----#####################
 @client.command(brief='Procurar perfil')
@@ -149,7 +199,11 @@ async def dc(ctx):
         if ctx.author.voice.channel and ctx.author.voice.channel == ctx.voice_client.channel:
             server = ctx.message.guild.voice_client
             await server.disconnect()
+<<<<<<< Updated upstream
             #await ctx.send("XAU")
+=======
+            listmusics = []
+>>>>>>> Stashed changes
         else:
             await ctx.send("Tens que estar no mesmo canal que o BOT MOCS YA")
     except AttributeError:
@@ -347,10 +401,13 @@ async def off(ctx):
         await ctx.send("BOT MOCS OFFLINE 🔴")
         server = ctx.message.guild.voice_client
         try:
-            await server.disconnect()
+            try:
+                await server.disconnect()
+            except:
+                print("Not in a voice_channel")
             await client.logout()
         except:
-            a = 0
+            print("Não consegui sair")
     else:
         await ctx.send("Não tens acesso a este codigo bem potente")
 
@@ -398,5 +455,6 @@ async def conselho(ctx):
 @client.command(brief='ping do BOTMOCS') #Concelho master
 async def ping(ctx):
     await ctx.send(f'**Ping??** **Pong!** Latency: {round(client.latency * 1000)}ms')
+
 
 client.run(TOKEN_KEY) 
