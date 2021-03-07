@@ -24,7 +24,7 @@ TOKEN_KEY = os.environ.get("TOKEN")
 listgalo = []
 listmusics =[]
 listtitles = []
-listemojiAJ=[":regional_indicator_a:",":regional_indicator_b:",":regional_indicator_c:",":regional_indicator_d:",":regional_indicator_e:",":regional_indicator_f:",":regional_indicator_g:",":regional_indicator_h",":regional_indicator_i",":regional_indicator_j"]
+listemojiAJ=["🇦","🇧","🇨","🇩","🇪","🇫","🇬","🇭","🇮","🇯"]
 prefix = "$"
 client = commands.Bot(command_prefix = prefix, case_insensitive = True)
 channel = client.get_channel(817878165325611069)
@@ -71,24 +71,25 @@ async def on_message(msg):
 #COMANDOS
 
 ###########----POLLS----############
-@client.command(brief="Poll todo maluco", help="Usar $poll pergunta, opção1, opção2, (...)")
+@client.command(brief="Poll todo maluco", help="Usar $poll pergunta, opção1, opção2, (...), opção10")
 @commands.cooldown(1,5, commands.BucketType.user)
 async def poll(ctx, *, params=None):
     # array de 10 opções -> listemojiAJ
     if(params==None):
-        return await ctx.send("```Usar $poll pergunta, opção1, opção2, (...)```")
+        return await ctx.send("```Usar $poll pergunta, opção1, opção2, (...), opção10```")
     else:
         opts = params.split(',')
+        if(len(opts) < 3 or len(opts)>10):
+            return await ctx.send("```Introduz a pergunta e 2 a 10 opções```")
         embed = discord.Embed(title = f"{opts[0]}", color = discord.Colour.teal())
         embed.set_footer(icon_url = ctx.author.avatar_url, text = f"Request by {ctx.author.name}")
         for val in range(len(opts)):
             if(val==len(opts)-1):
                 break
-            print(opts[val+1])
             embed.add_field(name = '\u200b', value=listemojiAJ[val] + " : " + f"{opts[val+1]}", inline=False)
         embed.add_field(name = '\u200b', value='\u200b', inline=False)
         msg = await ctx.send(embed=embed)
-        for i in range(len(opts)):
+        for i in range(len(opts)-1):
             await msg.add_reaction(listemojiAJ[i])
         return
     
