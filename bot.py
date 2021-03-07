@@ -74,7 +74,7 @@ async def on_message(msg):
 async def clear(ctx):
     listmusics.clear()
     listtitles.clear()
-    return
+    return 
 
 
 ###########----POLLS----############
