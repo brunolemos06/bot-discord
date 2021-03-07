@@ -10,7 +10,6 @@ from randomMessages import randomline
 import time
 import youtube_dl
 from discord.voice_client import VoiceClient
-#from music import playmusic
 from requests import get
 from youtube_dl import YoutubeDL
 from discord import FFmpegPCMAudio
@@ -49,7 +48,7 @@ async def on_message(msg):
             await msg.channel.send("NAO DIGAS ASNEIRAS NESTE DISCORD CARALHO, ESTAS TODO TURBINADO")
         if "che" in msg.content.lower():
             await msg.channel.send("CHE MADJÉ COTA MLINDRO VAI TE SUBIR LÁ HM")
-            mesage = await msg.channel.send(file=discord.File('milindro.PNG'))
+            message = await msg.channel.send(file=discord.File('milindro.PNG'))
             emoji = '\N{Heavy Black Heart}'
             await message.add_reaction(emoji)
             emoji = '\N{Smiling Face with Heart-Shaped Eyes}'
@@ -67,11 +66,19 @@ async def on_message(msg):
             await msg.channel.send("CHE GANDA BURRO NAO É assim que se pede um conselho YA")
         await  client.process_commands(msg)
 
-
 #COMANDOS
 
+############----CLEAR----############
+@client.command(brief="Limpa a queue", help=f"Usar {prefix} clear para limpar a lista de musicas")
+@commands.cooldown(1,5, commands.BucketType.user)
+async def clear(ctx):
+    listmusics.clear()
+    listtitles.clear()
+    return
+
+
 ###########----POLLS----############
-@client.command(brief="Poll todo maluco", help="Usar $poll pergunta, opção1, opção2, (...), opção10")
+@client.command(brief="Poll todo maluco", help=f"Usar {prefix}poll pergunta, opção1, opção2, (...), opção10")
 @commands.cooldown(1,5, commands.BucketType.user)
 async def poll(ctx, *, params=None):
     # array de 10 opções -> listemojiAJ
