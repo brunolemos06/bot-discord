@@ -68,14 +68,21 @@ async def on_message(msg):
 
 #COMANDOS
 
+###########----RANDOM----###########
+@client.command(brief="Experimenta bro", help="Mistery")
+@commands.cooldown(1,5,commands.BucketType.user)
+async def random(ctx):
+    url = randomline("noises.txt")
+    return await p(ctx=ctx, query=url)
+
+
 ############----CLEAR----############
 @client.command(brief="Limpa a queue", help=f"Usar {prefix} clear para limpar a lista de musicas")
 @commands.cooldown(1,5, commands.BucketType.user)
 async def clear(ctx):
     listmusics.clear()
     listtitles.clear()
-    return 
-
+    return await ctx.send("```As músicas foram limpas BRO ao contrário do teu cu YA```")
 
 ###########----POLLS----############
 @client.command(brief="Poll todo maluco", help=f"Usar {prefix}poll pergunta, opção1, opção2, (...), opção10")
