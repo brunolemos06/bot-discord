@@ -48,7 +48,7 @@ async def on_message(msg):
             await msg.channel.send("NAO DIGAS ASNEIRAS NESTE DISCORD CARALHO, ESTAS TODO TURBINADO")
         if "che" in msg.content.lower():
             await msg.channel.send("CHE MADJÉ COTA MLINDRO VAI TE SUBIR LÁ HM")
-            message = await msg.channel.send(file=discord.File('milindro.PNG'))
+            message = await msg.channel.send(file=discord.File('.png/milindro.PNG'))
             emoji = '\N{Heavy Black Heart}'
             await message.add_reaction(emoji)
             emoji = '\N{Smiling Face with Heart-Shaped Eyes}'
@@ -72,7 +72,7 @@ async def on_message(msg):
 @client.command(brief="Experimenta bro", help="Mistery")
 @commands.cooldown(1,5,commands.BucketType.user)
 async def random(ctx):
-    url = randomline("noises.txt")
+    url = randomline(".txt/noises.txt")
     return await p(ctx=ctx, query=url)
 
 
@@ -266,7 +266,7 @@ async def creditos(ctx):
 @client.command(brief='Connect BOTMOCS para bombar GUITZ', help='Connect BOTMOCS para bombar GUITZ')
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def guita(ctx):
-    url = randomline("guitz.txt")
+    url = randomline(".txt/guitz.txt")
     return await p(ctx=ctx, query=url)
   
 ####################----DC channel voice--------#############
@@ -381,17 +381,17 @@ async def galo(ctx):
                 listgalo.remove(player1)
                 listgalo.remove(player2) 
                 if(current_player == player1):
-                    return await ctx.send(f"Vencedor {player2.mention}, " + randomline("msgsPositivas.txt").lower())
+                    return await ctx.send(f"Vencedor {player2.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
                 elif(current_player == player2):
-                    return await ctx.send(f"Vencedor {player1.mention}, " + randomline("msgsPositivas.txt").lower())
+                    return await ctx.send(f"Vencedor {player1.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==1):
             listgalo.remove(player1)
             listgalo.remove(player2) 
-            return await ctx.send(f"Vencedor {player1.mention}, " + randomline("msgsPositivas.txt").lower())
+            return await ctx.send(f"Vencedor {player1.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==2):
             listgalo.remove(player1)
             listgalo.remove(player2) 
-            return await ctx.send(f"Vencedor {player2.mention}, " + randomline("msgsPositivas.txt").lower())
+            return await ctx.send(f"Vencedor {player2.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==0):
             listgalo.remove(player1)
             listgalo.remove(player2) 
@@ -502,10 +502,10 @@ async def dice(ctx):
         
         if (guess.content.isdigit()):
             if(int(guess.content) == answer):
-                frase = randomline("msgsPositivas.txt")
+                frase = randomline(".txt/msgsPositivas.txt")
                 return await ctx.send(frase) 
             else:
-                frase = randomline("msgsNegativas.txt")
+                frase = randomline(".txt/msgsNegativas.txt")
                 return await ctx.send(frase)
         else:
             return await ctx.send(f"{ctx.author.mention} isso não é um numero nabo")
@@ -522,7 +522,7 @@ async def hello(ctx):
 ############----CONS(C)ELHO----#################
 @client.command(brief='Recebe ganda conselho') #Concelho master
 async def conselho(ctx):
-    frase = randomline("messages.txt")
+    frase = randomline(".txt/messages.txt")
     return await ctx.send(frase)
 
 #################----ping----#####################~
