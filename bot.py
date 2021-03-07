@@ -69,9 +69,26 @@ async def on_message(msg):
 
 #COMANDOS
 
+###########----POLLS----############
+@client.command(brief="Poll todo maluco", help="Usar $poll opção1, opção2. opção3, (...)")
+@commands.cooldown(1,5, commands.BucketType.user)
+async def poll(ctx, *, options=None):
+    
+    if(options==None):
+        return await ctx.send("```Usar $poll opção1, opção2, opção3, (...)```")
+    else:
+        await ctx.send(f"Poll do grande {ctx.author.mention}")
+        opts = options.split(',')
+        counter = 1
+        for x in opts:
+            x = x.strip()
+            print(x)
+            option = await ctx.send("```" + str(counter) +": " + x + "```")
+            counter+=1
+
 
 ###########----SKIP_SONG----##########
-@client.command(brief="Passa essa musica horrivel à frente", help="Skip it")
+@client.command(brief="Passa essa musica horrivel à frente", help="Dá skip a musica que não gostas fazendo $skip")
 @commands.cooldown(1,3,commands.BucketType.user)
 async def skip(ctx):
     return await p(ctx=ctx, query="skip")
@@ -103,9 +120,10 @@ async def queue(ctx):
 @client.command(brief="TOCA O QUE quiseres bro", help="Eu toco para ti o que tu quiseres lido")
 @commands.cooldown(1,2,commands.BucketType.user)
 async def p(ctx, *, query):
-    #skip(sem nada)
+    #skip sem nada na lista
     if(query == "skip" and len(listmusics) == 0):
         return await ctx.send("```CHE TAS TODO TURBINADO, não há nada para dar skip FOOL```")
+    #remove sem nada na lista
     if("remove" in query and len(listmusics) ==0):
         return await ctx.send("```CHE GANDA NABO, não há nada para remover TONE```")
 
@@ -293,7 +311,7 @@ async def galo(ctx):
             return await ctx.send("Ninguém quer jogar contigo zeca :(")
     else:
         msg = "usar: "+prefix+"galo @mention  ou apenas "+prefix+"galo"                         # errado
-        return await ctx.send("usar: #galo @mention  ou apenas #galo")
+        return await ctx.send("usar: $galo @mention  ou apenas $galo")
     
     
     ############----COMEÇA A JOGAR O JOGO DO GALO ----############
