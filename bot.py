@@ -68,27 +68,47 @@ async def on_message(msg):
 
 
 #COMANDOS
-<<<<<<< Updated upstream
-=======
+
+
+###########----SKIP_SONG----##########
+@client.command(brief="Passa essa musica horrivel à frente", help="Skip it")
+@commands.cooldown(1,3,commands.BucketType.user)
+async def skip(ctx):
+    return await p(ctx=ctx, query="skip")
+
+###########----REMOVE_SONG----##########
+@client.command(brief="Limpa a musica que nao gostas da lista", help="XAU MUSICA")
+@commands.cooldown(1,3,commands.BucketType.user)
+async def remove(ctx, num):
+    val = "remove " + num
+    return await p(ctx=ctx, query=val)
+
 
 ##############----QUEUE----################
 @client.command(brief="Mosta a queue de musicas a bombar", help="Lista de musicas prontas para bombar")
 @commands.cooldown(1,3,commands.BucketType.user)
 async def queue(ctx):
-    embed = discord.Embed(title="Queue de músicas",description = "Lista de músicas na fila", color = discord.Colour.purple())
-    embed.set_thumbnail(url="https://www.creativefabrica.com/wp-content/uploads/2019/02/Music-Icon-by-Kanggraphic-1-580x386.jpg")
-    counter = 0
-    for x in listtitles:
-        counter = counter + 1
-        embed.add_field(name=str(counter), value=str(x), inline=False)
-    await ctx.send(embed=embed)
+    if(len(listtitles)!=0):
+        embed = discord.Embed(title="Queue de músicas",description = "Lista de músicas na fila", color = discord.Colour.purple())
+        embed.set_thumbnail(url="https://www.creativefabrica.com/wp-content/uploads/2019/02/Music-Icon-by-Kanggraphic-1-580x386.jpg")
+        counter = 0
+        for x in listtitles:
+            counter = counter + 1
+            embed.add_field(name=str(counter), value=str(x), inline=False)
+        return await ctx.send(embed=embed)
+    else:  
+        return await ctx.send("``Não há musicas na queue bro``")
 
->>>>>>> Stashed changes
 ###############----PLAY ANYTHING----################
 @client.command(brief="TOCA O QUE quiseres bro", help="Eu toco para ti o que tu quiseres lido")
 @commands.cooldown(1,2,commands.BucketType.user)
 async def p(ctx, *, query):
-    #Solves a problem I'll explain later
+    #skip(sem nada)
+    if(query == "skip" and len(listmusics) == 0):
+        return await ctx.send("```CHE TAS TODO TURBINADO, não há nada para dar skip FOOL```")
+    if("remove" in query and len(listmusics) ==0):
+        return await ctx.send("```CHE GANDA NABO, não há nada para remover TONE```")
+
     FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
     if not ctx.message.author.voice:
@@ -101,13 +121,36 @@ async def p(ctx, *, query):
         await channel.connect()
     except:
         print("ja ca estava dentro mas vou por a tocar")
-    video, source = search(query)
-    voice = get(client.voice_clients, guild=ctx.guild)
 
+    voice = get(client.voice_clients, guild=ctx.guild)
+    #skip(com musicas)
+    if(query == "skip" and len(listmusics)!=0 and len(listtitles)!= 0):
+        voice.stop()
+        listmusics.remove(listmusics[0])
+        listtitles.remove(listtitles[0])
+        return await play_next(voice, ctx)
+    #remove
+    if("remove" in query and len(listmusics)!=0):
+        num = int(query.split(' ')[1])
+        print(num)
+        if(num-1 == 0):
+            return await ctx.send("```BRO para remover a primeira musica faz $skip duh```")
+        try:
+            titulo = listtitles[num-1]
+        except IndexError:
+            return await ctx.send("```MAS ESSA musica não existe YA```")
+        listtitles.remove(listtitles[num-1])
+        listmusics.remove(listmusics[num-1])
+        msg = "```Música removida: " + titulo  + "```"
+        return await ctx.send(msg)
+    
+    async with ctx.typing():
+        video, source = search(query)
+
+    msg = "Adicionada à queue: " + str(video['title'])
     url = FFmpegPCMAudio(source, **FFMPEG_OPTS)
-    msg = "Adicionada à queue:" + str(video['title'])
-    embed = discord.Embed(title=msg,description ='\u200b', color = discord.Colour.orange())
-    await ctx.send(embed=embed)
+    
+    await ctx.send("```" + msg + "```")
 
     #verifica se ja tem musicas na queue, adicionando se ja tiver
     if(len(listmusics)!=0):
@@ -117,9 +160,10 @@ async def p(ctx, *, query):
     else:
         listmusics.append(url)
         listtitles.append(str(video['title']))
-        await play_next(voice, url, ctx)
+        await play_next(voice, ctx)
 
     timer = 0
+    
     while(not voice.is_playing()):
         await sleep(1)
         timer = timer + 1
@@ -127,32 +171,28 @@ async def p(ctx, *, query):
             await ctx.send("Musica : Não tava a tocar nada por isso bazei")
             await voice.disconnect()
             break
-<<<<<<< Updated upstream
-=======
 
-async def play_next(voice, url, ctx):
+async def play_next(voice, ctx):
     print(len(listmusics))
     while len(listmusics) != 0:
         print("vou tocar")
         voice.play(listmusics[0], after=lambda e:print('done', e))
         atual = "Now playing: " + listtitles[0]
-        embed = discord.Embed(title=atual,description ='\u200b', color = discord.Colour.orange())
-        await ctx.send(embed=embed)
+        await ctx.send("```" + atual + "```")
         while(voice.is_playing()):
             await sleep(1)
-        listmusics.remove(listmusics[0])
-        listtitles.remove(listtitles[0])
+        try:
+            listmusics.remove(listmusics[0])
+            listtitles.remove(listtitles[0])
+        except:
+            pass
 
->>>>>>> Stashed changes
 def search(arg):
     with YoutubeDL({'format': 'bestaudio', 'noplaylist':'True'}) as ydl:
         try: requests.get(arg)
         except: info = ydl.extract_info(f"ytsearch:{arg}", download=False)['entries'][0]
         else: info = ydl.extract_info(arg, download=False)
     return (info, info['formats'][0]['url'])
-
-
-
 
 ###############----PROFILE-----#####################
 @client.command(brief='Procurar perfil')
@@ -189,7 +229,7 @@ async def creditos(ctx):
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def guita(ctx):
     url = randomline("guitz.txt")
-    return await playmusic(url,ctx,client)
+    return await p(ctx=ctx, query=url)
   
 ####################----DC channel voice--------#############
 @client.command(brief='Disconnect BOTMOCS from channel')
@@ -199,11 +239,7 @@ async def dc(ctx):
         if ctx.author.voice.channel and ctx.author.voice.channel == ctx.voice_client.channel:
             server = ctx.message.guild.voice_client
             await server.disconnect()
-<<<<<<< Updated upstream
-            #await ctx.send("XAU")
-=======
             listmusics = []
->>>>>>> Stashed changes
         else:
             await ctx.send("Tens que estar no mesmo canal que o BOT MOCS YA")
     except AttributeError:
@@ -404,7 +440,7 @@ async def off(ctx):
             try:
                 await server.disconnect()
             except:
-                print("Not in a voice_channel")
+                print("Not in a voice channel")
             await client.logout()
         except:
             print("Não consegui sair")
