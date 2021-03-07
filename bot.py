@@ -10,7 +10,7 @@ from randomMessages import randomline
 import time
 import youtube_dl
 from discord.voice_client import VoiceClient
-from music import playmusic
+#from music import playmusic
 from requests import get
 from youtube_dl import YoutubeDL
 from discord import FFmpegPCMAudio
@@ -24,6 +24,7 @@ TOKEN_KEY = os.environ.get("TOKEN")
 listgalo = []
 listmusics =[]
 listtitles = []
+listemojiAJ=[":regional_indicator_a:",":regional_indicator_b:",":regional_indicator_c:",":regional_indicator_d:",":regional_indicator_e:",":regional_indicator_f:",":regional_indicator_g:",":regional_indicator_h",":regional_indicator_i",":regional_indicator_j"]
 prefix = "$"
 client = commands.Bot(command_prefix = prefix, case_insensitive = True)
 channel = client.get_channel(817878165325611069)
@@ -48,7 +49,7 @@ async def on_message(msg):
             await msg.channel.send("NAO DIGAS ASNEIRAS NESTE DISCORD CARALHO, ESTAS TODO TURBINADO")
         if "che" in msg.content.lower():
             await msg.channel.send("CHE MADJÉ COTA MLINDRO VAI TE SUBIR LÁ HM")
-            message = await msg.channel.send(file=discord.File('milindro.PNG'))
+            mesage = await msg.channel.send(file=discord.File('milindro.PNG'))
             emoji = '\N{Heavy Black Heart}'
             await message.add_reaction(emoji)
             emoji = '\N{Smiling Face with Heart-Shaped Eyes}'
@@ -70,23 +71,27 @@ async def on_message(msg):
 #COMANDOS
 
 ###########----POLLS----############
-@client.command(brief="Poll todo maluco", help="Usar $poll opção1, opção2. opção3, (...)")
+@client.command(brief="Poll todo maluco", help="Usar $poll pergunta, opção1, opção2, (...)")
 @commands.cooldown(1,5, commands.BucketType.user)
-async def poll(ctx, *, options=None):
-    
-    if(options==None):
-        return await ctx.send("```Usar $poll opção1, opção2, opção3, (...)```")
+async def poll(ctx, *, params=None):
+    # array de 10 opções -> listemojiAJ
+    if(params==None):
+        return await ctx.send("```Usar $poll pergunta, opção1, opção2, (...)```")
     else:
-        await ctx.send(f"Poll do grande {ctx.author.mention}")
-        opts = options.split(',')
-        counter = 1
-        for x in opts:
-            x = x.strip()
-            print(x)
-            option = await ctx.send("```" + str(counter) +": " + x + "```")
-            counter+=1
-
-
+        opts = params.split(',')
+        embed = discord.Embed(title = f"{opts[0]}", color = discord.Colour.teal())
+        embed.set_footer(icon_url = ctx.author.avatar_url, text = f"Request by {ctx.author.name}")
+        for val in range(len(opts)):
+            if(val==len(opts)-1):
+                break
+            print(opts[val+1])
+            embed.add_field(name = '\u200b', value=listemojiAJ[val] + " : " + f"{opts[val+1]}", inline=False)
+        embed.add_field(name = '\u200b', value='\u200b', inline=False)
+        msg = await ctx.send(embed=embed)
+        for i in range(len(opts)):
+            await msg.add_reaction(listemojiAJ[i])
+        return
+    
 ###########----SKIP_SONG----##########
 @client.command(brief="Passa essa musica horrivel à frente", help="Dá skip a musica que não gostas fazendo $skip")
 @commands.cooldown(1,3,commands.BucketType.user)
@@ -334,7 +339,7 @@ async def galo(ctx):
     while True :
         if(check_end_galo(array,numjogadas)== -1 and ctx.author.id != 816787135825838090): # continue
             play = await client.wait_for('message', check=jogadorCerto)
-            if(play.content != "#desisto"):
+            if(play.content != (prefix+"desisto")):
                 try:
                     jogada = int(play.content)-1        
                     if jogada>8 or jogada<0 or (not check_empty_pos_galo(array,jogada)):
