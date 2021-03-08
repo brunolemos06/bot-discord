@@ -55,6 +55,8 @@ async def on_message(msg):
             await message.add_reaction(emoji)
             emoji = '\N{DOUGHNUT}'
             await message.add_reaction(emoji)
+        if "turbina" in msg.content.lower():
+            await msg.channel.send(file=discord.File('.png/turbina.PNG'))
         if ('cona' in msg.content.lower() or 'penis' in msg.content.lower() or 'pila' in msg.content.lower() or 'vagina' in msg.content.lower() or 'pipi' in msg.content.lower() or 'dick' in msg.content.lower() or 'pussy' in msg.content.lower() or 'piça' in msg.content.lower()) :
             await msg.channel.send("ESTÁS COM FALTA DE PENIS OU DE CONA HMMMM ?")
         if  '<@!816787135825838090>' == msg.content :
@@ -68,13 +70,70 @@ async def on_message(msg):
 
 #COMANDOS
 
+###########----FORCA----##############
+@client.command(brief="Joga uma forca com essa malta fixe YA", help="Uso : $forca e tenta descobrir a palavra")
+@commands.cooldown(1,15,commands.BucketType.user)
+async def forca(ctx):
+    msg = await ctx.send("Quem quiser jogar a forca MOCADA reaja aí CHÉ yA em 7 segundos")
+    await msg.add_reaction('✔️')
+    channel = client.get_channel(817878165325611069)
+    await sleep(7.0)
+    message = await channel.fetch_message(msg.id)
+    users = []
+    for reaction in message.reactions:
+        async for user in reaction.users():
+            users.append(user)
+    palavra, msg = await init_forca(ctx)
+    #print(palavra)
+    def checkJogador(m):
+        return m.author in users
+    await ctx.send("CHE MALTA Voces tem 10 tentativas, gud luck :P")
+    tentativas = 10
+    while True:
+        if(not "❓" in msg):
+            return await ctx.send("`WINNER DINNER DA CHICKEN: "+ randomline(".txt/msgsPositivas.txt")+"`")
+        elif(tentativas==0):
+            return await ctx.send(f"NABOS. ja não há mais tentativas! A palavra era `{palavra}`")
+        else:
+            play = await client.wait_for('message', check=checkJogador)
+            if (play.content.lower().strip() == palavra.lower().rstrip()):
+                await ctx.send("```" + palavra + "```")
+                return await ctx.send("FOda-sE este gajo é um MESTRE CONGRATS")
+            if(len(play.content) != 1):
+                tentativas-=1
+                await ctx.send("Utiliza apenas uma letra BARRAQUERo")
+            else:
+                pos = [idx for idx, item in enumerate(palavra.lower()) if play.content.lower() in item]
+                msgList = list(msg)
+                if pos:
+                    for p in pos:
+                        msgList[p] = play.content
+                    msg = "".join(msgList)
+                    await ctx.send(msg)
+                    
+                else:
+                    tentativas-=1
+                    await ctx.send(f"`Errado nabo, so há mais {tentativas} tentativas disponiveis`")
+
+async def init_forca(ctx):
+    palavra = randomline(".txt/words.txt")
+    msg = ""
+    for x in range(len(palavra)):
+        if(x==len(palavra)-1 and not "-" in palavra):
+            break
+        if(not palavra[x]=="-"):
+            msg = msg + "❓"
+        else:
+            msg = msg + '-'
+    await ctx.send("```" + msg + "```")
+    return [palavra,msg]
+
 ###########----RANDOM----###########
 @client.command(brief="Experimenta bro", help="Mistery")
 @commands.cooldown(1,5,commands.BucketType.user)
 async def random(ctx):
     url = randomline(".txt/noises.txt")
     return await p(ctx=ctx, query=url)
-
 
 ############----CLEAR----############
 @client.command(brief="Limpa a queue", help=f"Usar {prefix} clear para limpar a lista de musicas")
