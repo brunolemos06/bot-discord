@@ -205,7 +205,11 @@ async def p(ctx, *, query):
     #remove sem nada na lista
     if("remove" in query and len(listmusics) ==0):
         return await ctx.send("```CHE GANDA NABO, não há nada para remover TONE```")
-
+    #spotify playlist
+    if("open.spotify.com" in query):
+        return await ctx.send("```POr enqunato o spotify não funciona, está todo TURBINADO```")
+    #youtube music playlist
+    
     FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
     if not ctx.message.author.voice:
