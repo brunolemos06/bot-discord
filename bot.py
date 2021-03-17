@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 from os.path import join,dirname
 import discord
-import random
+import random as ran
 from discord.ext import tasks,commands
 import emoji
 import asyncio
@@ -57,6 +57,8 @@ async def on_message(msg):
             await message.add_reaction(emoji)
         if "turbina" in msg.content.lower():
             await msg.channel.send(file=discord.File('.png/turbina.PNG'))
+        if "satelite" in msg.content.lower():
+            await msg.channel.send(file=discord.File('.png/satelite.png'))
         if ('cona' in msg.content.lower() or 'penis' in msg.content.lower() or 'pila' in msg.content.lower() or 'vagina' in msg.content.lower() or 'pipi' in msg.content.lower() or 'dick' in msg.content.lower() or 'pussy' in msg.content.lower() or 'piça' in msg.content.lower()) :
             await msg.channel.send("ESTÁS COM FALTA DE PENIS OU DE CONA HMMMM ?")
         if  '<@!816787135825838090>' == msg.content :
@@ -80,10 +82,13 @@ async def forca(ctx):
     await sleep(7.0)
     message = await channel.fetch_message(msg.id)
     users = []
+    users.append(ctx.author)
     for reaction in message.reactions:
         async for user in reaction.users():
             users.append(user)
     palavra, msg = await init_forca(ctx)
+    if(not palavra):
+        palavra = "prancha"
     #print(palavra)
     def checkJogador(m):
         return m.author in users
@@ -101,7 +106,7 @@ async def forca(ctx):
                 return await ctx.send("FOda-sE este gajo é um MESTRE CONGRATS")
             if(len(play.content) != 1):
                 tentativas-=1
-                await ctx.send("Utiliza apenas uma letra BARRAQUERo")
+                await ctx.send(f"`Utiliza apenas uma letra BARRAQUERo, já so tens mais {tentativas} disponíveis`")
             else:
                 pos = [idx for idx, item in enumerate(palavra.lower()) if play.content.lower() in item]
                 msgList = list(msg)
@@ -524,7 +529,7 @@ async def print_galo(array, jogador, ctx):
 async def coin(ctx):
     smile = '\N{SLIGHTLY SMILING FACE}'
     coroa = '\N{CROWN}'
-    choice = random.randint(1,2)
+    choice = ran.randint(1,2)
     if(choice == 1):
         return await ctx.message.add_reaction(smile)
     else:
@@ -556,7 +561,7 @@ async def dice(ctx):
         def is_correct(m):
             return m.author == ctx.author
 
-        answer = random.randint(1,6)
+        answer = ran.randint(1,6)
         try:
             await ctx.send(f"{ctx.author.mention} chuta um numero de 1 a 6 e vê se adivinhas")
             guess = await client.wait_for('message', check = is_correct, timeout=10.0)
@@ -569,7 +574,7 @@ async def dice(ctx):
                 return await ctx.send(frase) 
             else:
                 frase = randomline(".txt/msgsNegativas.txt")
-                return await ctx.send(frase)
+                return await ctx.send(frase + f"O número era o {answer} seu burro")
         else:
             return await ctx.send(f"{ctx.author.mention} isso não é um numero nabo")
 
