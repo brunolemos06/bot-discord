@@ -1,3 +1,4 @@
+
 from dotenv import load_dotenv
 import os
 from os.path import join,dirname
@@ -28,7 +29,10 @@ prefix = "$"
 client = commands.Bot(command_prefix = prefix, case_insensitive = True)
 channel = client.get_channel(817878165325611069)
 
-
+#CARREGA JSON
+ficheiro_niveis = open(".json/niveis.json",'r')
+niveis = ficheiro_niveis.read()
+print(niveis)
 
 #EVENTOS
 @client.event    #IM IN SON
@@ -557,6 +561,7 @@ async def off(ctx):
 @client.command(brief ='Guess the dice :p') #JOGA ESSE DADO
 @commands.cooldown(1, 5, commands.BucketType.user)
 async def dice(ctx):
+
 
         def is_correct(m):
             return m.author == ctx.author
