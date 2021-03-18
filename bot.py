@@ -16,6 +16,7 @@ from youtube_dl import YoutubeDL
 from discord import FFmpegPCMAudio
 from discord.utils import get
 from asyncio import sleep
+from niveis import readJSON,writeJSON,storeXP
 
 
 dotenv_path = join(dirname(__file__),'.env')
@@ -29,14 +30,11 @@ prefix = "$"
 client = commands.Bot(command_prefix = prefix, case_insensitive = True)
 channel = client.get_channel(817878165325611069)
 
-#CARREGA JSON
-ficheiro_niveis = open(".json/niveis.json",'r')
-niveis = ficheiro_niveis.read()
-print(niveis)
-
 #EVENTOS
 @client.event    #IM IN SON
 async def on_ready():
+
+    
     print('BotMOCS está online: {0.user}' .format(client))
     #channel = client.get_channel(817878165325611069)
     #await channel.send("BOT ESTÁ ONLINE :green_circle:")
@@ -82,7 +80,7 @@ async def on_message(msg):
 async def forca(ctx):
     msg = await ctx.send("Quem quiser jogar a forca MOCADA reaja aí CHÉ yA em 7 segundos")
     await msg.add_reaction('✔️')
-    channel = client.get_channel(817878165325611069)
+    channel = client.get_channel(715512000720928779)
     await sleep(7.0)
     message = await channel.fetch_message(msg.id)
     users = []
@@ -100,12 +98,19 @@ async def forca(ctx):
     tentativas = 10
     while True:
         if(not "❓" in msg):
+            for user in users:
+                if(user.id != 816787135825838090):
+                    storeXP(str(user.id),10*int(tentativas/2))
             return await ctx.send("`WINNER DINNER DA CHICKEN: "+ randomline(".txt/msgsPositivas.txt")+"`")
         elif(tentativas==0):
             return await ctx.send(f"NABOS. ja não há mais tentativas! A palavra era `{palavra}`")
         else:
             play = await client.wait_for('message', check=checkJogador)
             if (play.content.lower().strip() == palavra.lower().rstrip()):
+                storeXP(str(play.author.id),12*tentativas-5)
+                for user in users:
+                    if(user.id != 816787135825838090):
+                        storeXP(str(user.id),8)
                 await ctx.send("```" + palavra + "```")
                 return await ctx.send("FOda-sE este gajo é um MESTRE CONGRATS")
             if(len(play.content) != 1):
@@ -162,7 +167,7 @@ async def poll(ctx, *, params=None):
     else:
         opts = params.split(',')
         if(len(opts) < 3 or len(opts)>10):
-            return await ctx.send("```Introduz a pergunta e 2 a 10 opções```")
+            return await ctx.send("```Introduz a pergunta e 2 a 10 opções separados por virgulas```")
         embed = discord.Embed(title = f"{opts[0]}", color = discord.Colour.teal())
         embed.set_footer(icon_url = ctx.author.avatar_url, text = f"Request by {ctx.author.name}")
         for val in range(len(opts)):
@@ -453,20 +458,26 @@ async def galo(ctx):
                 listgalo.remove(player1)
                 listgalo.remove(player2) 
                 if(current_player == player1):
+                    storeXP(str(player2.id),50)
                     return await ctx.send(f"Vencedor {player2.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
                 elif(current_player == player2):
+                    storeXP(str(player1.id),50)
                     return await ctx.send(f"Vencedor {player1.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==1):
             listgalo.remove(player1)
             listgalo.remove(player2) 
+            storeXP(str(player1.id),50)
             return await ctx.send(f"Vencedor {player1.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==2):
             listgalo.remove(player1)
             listgalo.remove(player2) 
+            storeXP(str(player2.id),50)
             return await ctx.send(f"Vencedor {player2.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==0):
             listgalo.remove(player1)
             listgalo.remove(player2) 
+            storeXP(str(player1.id),15)
+            storeXP(str(player2.id),15)
             return await ctx.send(f"Empate entre {player1.mention} e {player2.mention}, Tentem de novo!!!")      
 def check_end_galo(array,numjogadas):
     #return 0 empate
@@ -559,9 +570,8 @@ async def off(ctx):
 
 ##############----DICE----#################
 @client.command(brief ='Guess the dice :p') #JOGA ESSE DADO
-@commands.cooldown(1, 5, commands.BucketType.user)
+@commands.cooldown(1, 2, commands.BucketType.user)
 async def dice(ctx):
-
 
         def is_correct(m):
             return m.author == ctx.author
@@ -575,6 +585,7 @@ async def dice(ctx):
         
         if (guess.content.isdigit()):
             if(int(guess.content) == answer):
+                storeXP(str(ctx.author.id),10)
                 frase = randomline(".txt/msgsPositivas.txt")
                 return await ctx.send(frase) 
             else:
