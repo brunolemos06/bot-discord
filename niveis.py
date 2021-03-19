@@ -4,11 +4,6 @@ def writeJSON(data):
     with open('.json/niveis.json','w') as fp:
         json.dump(data,fp)
 
-#Example
-# data = {}
-# data['guitapimpolha'] = 30
-# usar : writeNivel(".json/niveis.json")
-
 def readJSON():
     with open('.json/niveis.json') as f:
         return json.load(f)

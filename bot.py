@@ -33,9 +33,7 @@ channel = client.get_channel(817878165325611069)
 #EVENTOS
 @client.event    #IM IN SON
 async def on_ready():
-
-    
-    print('BotMOCS está online: {0.user}' .format(client))
+ print('BotMOCS está online: {0.user}' .format(client))
     #channel = client.get_channel(817878165325611069)
     #await channel.send("BOT ESTÁ ONLINE :green_circle:")
 
@@ -74,6 +72,37 @@ async def on_message(msg):
 
 #COMANDOS
 
+##########----XP----##############
+@client.command(brief="Mostra os niveis das pessoas jogaDORAS", help="Uso : $xp ou $xp @user")
+@commands.cooldown(1,2,commands.BucketType.user)
+async def xp(ctx, mention:str=None):
+    niveis = readJSON()    
+    if mention == None:
+        cont = 0
+        embed = discord.Embed(title="MALTA PRO NO JOGO",description = "Níveis dos melhores jogadores", color = discord.Colour.red())
+        embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Video_game_controller_icon_designed_by_Maico_Amorim.svg/1200px-Video_game_controller_icon_designed_by_Maico_Amorim.svg.png")
+        ordenado = sorted(niveis, key=niveis.get, reverse=True)
+        for user in ordenado:
+            cont+=1
+            embed.add_field(name=f"Top {cont} - {niveis[user]} XP", value="<@"+user+">", inline=False)
+            if(cont==7): break
+    else:
+        
+        nome = mention.replace("<","").replace(">","").replace("@","").replace("!","")
+        if len(str(nome)) != 18 or nome == "816787135825838090":
+            return await ctx.send("@ invalido ! Uso: $xp ou $xp @user")
+        try:
+            xp = niveis[nome]
+            embed = discord.Embed(title="GRANDE JOGADOR",description = "E o seu nivel de xp", color = discord.Colour.red())
+            embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Video_game_controller_icon_designed_by_Maico_Amorim.svg/1200px-Video_game_controller_icon_designed_by_Maico_Amorim.svg.png")
+            embed.add_field(name=f"{xp}XP", value="<@"+nome+">", inline=False)
+        except:
+            embed = discord.Embed(title="jogador PODRE",description = "não joga nada YA", color = discord.Colour.purple())
+            embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Video_game_controller_icon_designed_by_Maico_Amorim.svg/1200px-Video_game_controller_icon_designed_by_Maico_Amorim.svg.png")
+            embed.add_field(name="0XP", value="<@"+nome+">", inline=False)
+    return await ctx.send(embed=embed)
+                
+
 ###########----FORCA----##############
 @client.command(brief="Joga uma forca com essa malta fixe YA", help="Uso : $forca e tenta descobrir a palavra")
 @commands.cooldown(1,15,commands.BucketType.user)
@@ -96,26 +125,29 @@ async def forca(ctx):
         return m.author in users
     await ctx.send("CHE MALTA Voces tem 10 tentativas, gud luck :P")
     tentativas = 10
+    erradas = []
     while True:
         if(not "❓" in msg):
             for user in users:
                 if(user.id != 816787135825838090):
-                    storeXP(str(user.id),10*int(tentativas/2))
-            return await ctx.send("`WINNER DINNER DA CHICKEN: "+ randomline(".txt/msgsPositivas.txt")+"`")
+                    xp = 10*int(tentativas/2)
+                    storeXP(str(user.id),xp)
+            return await ctx.send("WINNER DINNER DA CHICKEN: "+ randomline(".txt/msgsPositivas.txt")+f", `GANHARAM {xp}XP")
         elif(tentativas==0):
             return await ctx.send(f"NABOS. ja não há mais tentativas! A palavra era `{palavra}`")
         else:
             play = await client.wait_for('message', check=checkJogador)
             if (play.content.lower().strip() == palavra.lower().rstrip()):
+                xp = 12*tentativas-5
                 storeXP(str(play.author.id),12*tentativas-5)
                 for user in users:
                     if(user.id != 816787135825838090):
                         storeXP(str(user.id),8)
                 await ctx.send("```" + palavra + "```")
-                return await ctx.send("FOda-sE este gajo é um MESTRE CONGRATS")
+                return await ctx.send(f"FOda-sE este gajo é um MESTRE CONGRATS, GANHASTE `{xp}XP`")
             if(len(play.content) != 1):
                 tentativas-=1
-                await ctx.send(f"`Utiliza apenas uma letra BARRAQUERo, já so tens mais {tentativas} disponíveis`")
+                await ctx.send(f"`Utiliza apenas uma letra BARRAQUERo (ou a palavra certa YA), já so tens mais `{tentativas} tentativas` disponíveis`")
             else:
                 pos = [idx for idx, item in enumerate(palavra.lower()) if play.content.lower() in item]
                 msgList = list(msg)
@@ -127,7 +159,13 @@ async def forca(ctx):
                     
                 else:
                     tentativas-=1
-                    await ctx.send(f"`Errado nabo, so há mais {tentativas} tentativas disponiveis`")
+                    if not play.content in erradas:
+                        erradas.append[play.content ]
+                    await ctx.send(f"`Errado nabo, so há mais `{tentativas} tentativas` disponiveis`")
+                    letras =""
+                    for letra in erradas:
+                        letras+=", "+letra
+                    await ctx.send(f"`Letras usadas: {letras}`")
 
 async def init_forca(ctx):
     palavra = randomline(".txt/words.txt")
@@ -339,6 +377,10 @@ async def creditos(ctx):
      embed.add_field(name="André Clérigo", value ='<@239323719300939776>', inline=True)
      await ctx.send(embed=embed)
 
+@client.command()
+async def credits(ctx):
+    return await creditos(ctx)
+    
 ###############----GUITA----####################
 @client.command(brief='Connect BOTMOCS para bombar GUITZ', help='Connect BOTMOCS para bombar GUITZ')
 @commands.cooldown(1, 2, commands.BucketType.user)
@@ -585,12 +627,12 @@ async def dice(ctx):
         
         if (guess.content.isdigit()):
             if(int(guess.content) == answer):
-                storeXP(str(ctx.author.id),10)
+                storeXP(str(ctx.author.id),20)
                 frase = randomline(".txt/msgsPositivas.txt")
-                return await ctx.send(frase) 
+                return await ctx.send(f"{frase}, GANHASTE `20XP` ") 
             else:
                 frase = randomline(".txt/msgsNegativas.txt")
-                return await ctx.send(frase + f"O número era o {answer} seu burro")
+                return await ctx.send(frase + f"O número era o `{answer}` seu burro")
         else:
             return await ctx.send(f"{ctx.author.mention} isso não é um numero nabo")
 
