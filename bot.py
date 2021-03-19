@@ -1,4 +1,3 @@
-
 from dotenv import load_dotenv
 import os
 from os.path import join,dirname
@@ -17,11 +16,13 @@ from discord import FFmpegPCMAudio
 from discord.utils import get
 from asyncio import sleep
 from niveis import readJSON,writeJSON,storeXP
+from weather import InfoByCity
 
 
 dotenv_path = join(dirname(__file__),'.env')
 load_dotenv(dotenv_path)
 TOKEN_KEY = os.environ.get("TOKEN")
+APIKEY = os.environ.get("APIKEY")
 listgalo = []
 listmusics =[]
 listtitles = []
@@ -73,7 +74,18 @@ async def on_message(msg):
         await  client.process_commands(msg)
 
 #COMANDOS
-
+##########----temp----##############
+@client.command(brief="Mostra a temperatura para hoje numa cidade", help=f"Uso : {prefix}temp cidade")
+@commands.cooldown(1,5,commands.BucketType.user)
+async def temp(ctx,city):
+    #try:
+    temp,iconurl = InfoByCity(city,APIKEY)
+    embed = discord.Embed(title="Informação do tempo",description = f"Em {city}:", color = discord.Colour.blue())
+    embed.set_thumbnail(url=iconurl)
+    embed.add_field(name=f"Temperatura", value=f"{temp}", inline=False)
+    return await ctx.send(embed=embed)
+   # except:
+        #return await ctx.send("`Cidade inválida`")
 ##########----XP----##############
 @client.command(brief="Mostra os niveis das pessoas jogaDORAS", help=f"Uso : {prefix}xp ou {prefix}xp @user")
 @commands.cooldown(1,2,commands.BucketType.user)
@@ -140,13 +152,13 @@ async def forca(ctx):
         else:
             play = await client.wait_for('message', check=checkJogador)
             if (play.content.lower().strip() == palavra.lower().rstrip()):
-                storeXP(str(play.author.id),12*tentativas-5)
+                xp = 12*tentativas-5
+                storeXP(str(play.author.id),xp)
                 for user in users:
                     if(user.id != 816787135825838090):
                         storeXP(str(user.id),8)
                 await ctx.send("```" + palavra + "```")
                 await ctx.send(f"FOda-sE este gajo é um MESTRE CONGRATS")
-                xp = 10*int(tentativas/2)
                 return await ctx.send(f"`Ganhaste{xp}XP !!`")
             if(len(play.content) != 1):
                 tentativas-=1
