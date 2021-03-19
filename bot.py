@@ -81,7 +81,7 @@ async def xp(ctx, mention:str=None):
     niveis = readJSON()     
     if mention == None:
         cont = 0
-        embed = discord.Embed(title="MALTA PRO NO JOGO",description = "Níveis dos melhores jogadores", color = discord.Colour.red())
+        embed = discord.Embed(title="MALTA PRO NO JOGO",description = "Níveis dos 7 melhores jogadores", color = discord.Colour.red())
         embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Video_game_controller_icon_designed_by_Maico_Amorim.svg/1200px-Video_game_controller_icon_designed_by_Maico_Amorim.svg.png")
         ordenado = sorted(niveis, key=niveis.get, reverse=True)
         for user in ordenado:
@@ -95,7 +95,7 @@ async def xp(ctx, mention:str=None):
             return await ctx.send("@ invalido ! Uso: $xp ou $xp @user")
         try:
             xp = niveis[nome]
-            embed = discord.Embed(title="GRANDE JOGADOR",description = "E o seu nivel de xp", color = discord.Colour.red())
+            embed = discord.Embed(title="GRANDE JOGADOR",description = "O Seu nivel de xp", color = discord.Colour.red())
             embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Video_game_controller_icon_designed_by_Maico_Amorim.svg/1200px-Video_game_controller_icon_designed_by_Maico_Amorim.svg.png")
             embed.add_field(name=f"{xp}XP", value="<@"+nome+">", inline=False)
         except:
@@ -654,9 +654,10 @@ async def dice(ctx):
         
         if (guess.content.isdigit()):
             if(int(guess.content) == answer):
-                storeXP(str(ctx.author.id),20)
+                xp = 20
+                storeXP(str(ctx.author.id),xp)
                 frase = randomline(".txt/msgsPositivas.txt")
-                return await ctx.send(f"{frase}, GANHASTE `20XP` ") 
+                return await ctx.send(f"{frase}, GANHASTE `{xp}XP` ") 
             else:
                 frase = randomline(".txt/msgsNegativas.txt")
                 return await ctx.send(frase + f"O número era o `{answer}` seu burro")
