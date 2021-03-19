@@ -68,15 +68,17 @@ async def on_message(msg):
             await msg.channel.send(embed=embed)
         if (prefix+"concelho") == msg.content:
             await msg.channel.send("CHE GANDA BURRO NAO É assim que se pede um conselho YA")
+        if (prefix+"credits") == msg.content.lower():
+            await  creditos(msg.channel)
         await  client.process_commands(msg)
 
 #COMANDOS
 
 ##########----XP----##############
-@client.command(brief="Mostra os niveis das pessoas jogaDORAS", help="Uso : $xp ou $xp @user")
+@client.command(brief="Mostra os niveis das pessoas jogaDORAS", help=f"Uso : {prefix}xp ou {prefix}xp @user")
 @commands.cooldown(1,2,commands.BucketType.user)
 async def xp(ctx, mention:str=None):
-    niveis = readJSON()    
+    niveis = readJSON()     
     if mention == None:
         cont = 0
         embed = discord.Embed(title="MALTA PRO NO JOGO",description = "Níveis dos melhores jogadores", color = discord.Colour.red())
@@ -104,7 +106,7 @@ async def xp(ctx, mention:str=None):
                 
 
 ###########----FORCA----##############
-@client.command(brief="Joga uma forca com essa malta fixe YA", help="Uso : $forca e tenta descobrir a palavra")
+@client.command(brief="Joga uma forca com essa malta fixe YA", help=f"Uso : {prefix}forca e tenta descobrir a palavra")
 @commands.cooldown(1,15,commands.BucketType.user)
 async def forca(ctx):
     msg = await ctx.send("Quem quiser jogar a forca MOCADA reaja aí CHÉ yA em 7 segundos")
@@ -125,47 +127,74 @@ async def forca(ctx):
         return m.author in users
     await ctx.send("CHE MALTA Voces tem 10 tentativas, gud luck :P")
     tentativas = 10
-    erradas = []
+    usadas = []
     while True:
         if(not "❓" in msg):
             for user in users:
                 if(user.id != 816787135825838090):
                     xp = 10*int(tentativas/2)
                     storeXP(str(user.id),xp)
-            return await ctx.send("WINNER DINNER DA CHICKEN: "+ randomline(".txt/msgsPositivas.txt")+f", `GANHARAM {xp}XP")
+            return await ctx.send("`WINNER DINNER DA CHICKEN: "+ randomline(".txt/msgsPositivas.txt")+"`")
         elif(tentativas==0):
             return await ctx.send(f"NABOS. ja não há mais tentativas! A palavra era `{palavra}`")
         else:
             play = await client.wait_for('message', check=checkJogador)
             if (play.content.lower().strip() == palavra.lower().rstrip()):
-                xp = 12*tentativas-5
                 storeXP(str(play.author.id),12*tentativas-5)
                 for user in users:
                     if(user.id != 816787135825838090):
                         storeXP(str(user.id),8)
                 await ctx.send("```" + palavra + "```")
-                return await ctx.send(f"FOda-sE este gajo é um MESTRE CONGRATS, GANHASTE `{xp}XP`")
+                await ctx.send(f"FOda-sE este gajo é um MESTRE CONGRATS")
+                xp = 10*int(tentativas/2)
+                return await ctx.send(f"`Ganhaste{xp}XP !!`")
             if(len(play.content) != 1):
                 tentativas-=1
-                await ctx.send(f"`Utiliza apenas uma letra BARRAQUERo (ou a palavra certa YA), já so tens mais `{tentativas} tentativas` disponíveis`")
+                await ctx.send(f"`Utiliza apenas uma letra BARRAQUERo, já so tens mais {tentativas} disponíveis`")
             else:
                 pos = [idx for idx, item in enumerate(palavra.lower()) if play.content.lower() in item]
                 msgList = list(msg)
                 if pos:
+                    if(play.content in usadas):
+                        await ctx.send(f"`Letra já usada: Tens {tentativas} tentativas disponiveis`")
+                    else:
+                        usadas.append(play.content)
                     for p in pos:
                         msgList[p] = play.content
                     msg = "".join(msgList)
-                    await ctx.send(msg)
-                    
+                    await ctx.send(msg)  
+                    text=""
+                    k=0
+                    for letra in usadas:
+                        if(k==0):
+                            text+=letra
+                            k+=1
+                        else:
+                            text+=", "+letra
+                    await ctx.send(f"Letras usadas: {text}") 
                 else:
-                    tentativas-=1
-                    if not play.content in erradas:
-                        erradas.append[play.content ]
-                    await ctx.send(f"`Errado nabo, so há mais `{tentativas} tentativas` disponiveis`")
-                    letras =""
-                    for letra in erradas:
-                        letras+=", "+letra
-                    await ctx.send(f"`Letras usadas: {letras}`")
+                    if(play.content in usadas ):
+                        await ctx.send(f"`Letra já usada: Tens {tentativas} tentativas disponiveis`") 
+                    else:
+                        usadas.append(play.content)
+                        tentativas-=1
+                        await ctx.send(f"`Errado nabo, so há mais {tentativas} tentativas disponiveis`")
+                    pos = [idx for idx, item in enumerate(palavra.lower()) if play.content.lower() in item]
+                    msgList = list(msg)
+                    if pos:
+                        for p in pos:
+                            msgList[p] = play.content
+                    msg = "".join(msgList)
+                    await ctx.send(msg)
+                    text=""
+                    k=0
+                    for letra in usadas:
+                        if(k==0):
+                            text+=letra
+                            k=1
+                        else:
+                            text+=", "+letra
+                    await ctx.send(f"Letras usadas: {text}")
 
 async def init_forca(ctx):
     palavra = randomline(".txt/words.txt")
@@ -181,14 +210,14 @@ async def init_forca(ctx):
     return [palavra,msg]
 
 ###########----RANDOM----###########
-@client.command(brief="Experimenta bro", help="Mistery")
+@client.command(brief="Experimenta bro", help=f"Usar: {prefix}random, Faz o que ? Mistery")
 @commands.cooldown(1,5,commands.BucketType.user)
 async def random(ctx):
     url = randomline(".txt/noises.txt")
     return await p(ctx=ctx, query=url)
 
 ############----CLEAR----############
-@client.command(brief="Limpa a queue", help=f"Usar {prefix} clear para limpar a lista de musicas")
+@client.command(brief="Limpa a queue", help=f"Usar: {prefix}clear para limpar a lista de musicas")
 @commands.cooldown(1,5, commands.BucketType.user)
 async def clear(ctx):
     listmusics.clear()
@@ -196,7 +225,7 @@ async def clear(ctx):
     return await ctx.send("```As músicas foram limpas BRO ao contrário do teu cu YA```")
 
 ###########----POLLS----############
-@client.command(brief="Poll todo maluco", help=f"Usar {prefix}poll pergunta, opção1, opção2, (...), opção10")
+@client.command(brief="Poll todo maluco", help=f"Usar: {prefix}poll pergunta, opção1, opção2, (...), opção10")
 @commands.cooldown(1,5, commands.BucketType.user)
 async def poll(ctx, *, params=None):
     # array de 10 opções -> listemojiAJ
@@ -214,18 +243,19 @@ async def poll(ctx, *, params=None):
             embed.add_field(name = '\u200b', value=listemojiAJ[val] + " : " + f"{opts[val+1]}", inline=False)
         embed.add_field(name = '\u200b', value='\u200b', inline=False)
         msg = await ctx.send(embed=embed)
+        storeXP(ctx.author.id,5)
         for i in range(len(opts)-1):
             await msg.add_reaction(listemojiAJ[i])
         return
     
 ###########----SKIP_SONG----##########
-@client.command(brief="Passa essa musica horrivel à frente", help="Dá skip a musica que não gostas fazendo $skip")
+@client.command(brief="Passa essa musica horrivel à frente", help=f"Usar: {prefix}skip, dá skip a musica")
 @commands.cooldown(1,3,commands.BucketType.user)
 async def skip(ctx):
     return await p(ctx=ctx, query="skip")
 
 ###########----REMOVE_SONG----##########
-@client.command(brief="Limpa a musica que nao gostas da lista", help="XAU MUSICA")
+@client.command(brief="Limpa a musica que nao gostas da lista", help=f"Usar: {prefix}remove num, XAU MUSICA")
 @commands.cooldown(1,3,commands.BucketType.user)
 async def remove(ctx, num):
     val = "remove " + num
@@ -233,7 +263,7 @@ async def remove(ctx, num):
 
 
 ##############----QUEUE----################
-@client.command(brief="Mosta a queue de musicas a bombar", help="Lista de musicas prontas para bombar")
+@client.command(brief="Mosta a queue de musicas a bombar", help=f"Usar: {prefix}queue, Lista de musicas prontas para bombar")
 @commands.cooldown(1,3,commands.BucketType.user)
 async def queue(ctx):
     if(len(listtitles)!=0):
@@ -248,7 +278,7 @@ async def queue(ctx):
         return await ctx.send("``Não há musicas na queue bro``")
 
 ###############----PLAY ANYTHING----################
-@client.command(brief="TOCA O QUE quiseres bro", help="Eu toco para ti o que tu quiseres lido")
+@client.command(brief="TOCA O QUE quiseres bro", help=f"Usar: {prefix}play, Eu toco para ti o que tu quiseres lido")
 @commands.cooldown(1,2,commands.BucketType.user)
 async def p(ctx, *, query):
     #skip sem nada na lista
@@ -348,7 +378,7 @@ def search(arg):
     return (info, info['formats'][0]['url'])
 
 ###############----PROFILE-----#####################
-@client.command(brief='Procurar perfil')
+@client.command(brief='Procurar perfil',help=f'Usar: {prefix}profile @user')
 @commands.cooldown(1,2, commands.BucketType.user)
 async def profile(ctx):
     try:
@@ -360,11 +390,11 @@ async def profile(ctx):
         embed.set_footer(icon_url = ctx.author.avatar_url, text = f"Request by {ctx.author.name}")
         await ctx.send(embed = embed)
     except:
-        msg = "Introduz um mention valido | usar : "+prefix+"profile @mention"
+        msg = "Introduz um mention valido | usar : "+prefix+"profile @user"
         return await ctx.send(msg)
 
 ###############----CREDITOS----#####################
-@client.command(brief='Creditos da malta por trás do MOCS YA', help='Mostra os cérebros por trás deste grande MOCS')
+@client.command(brief='Creditos da malta por trás do MOCS YA', help=f'Usar: {prefix}creditos | {prefix}credits para ver os creditos')
 @commands.cooldown(1,2, commands.BucketType.user)
 async def creditos(ctx):
      embed = discord.Embed(title="Créditos",description = "Cérebros por trás do BOTMOCS", color = discord.Colour.red())
@@ -376,20 +406,16 @@ async def creditos(ctx):
      embed.add_field(name="Pedro Rocha", value ='<@539520976577363981>', inline=True)
      embed.add_field(name="André Clérigo", value ='<@239323719300939776>', inline=True)
      await ctx.send(embed=embed)
-
-@client.command()
-async def credits(ctx):
-    return await creditos(ctx)
     
 ###############----GUITA----####################
-@client.command(brief='Connect BOTMOCS para bombar GUITZ', help='Connect BOTMOCS para bombar GUITZ')
+@client.command(brief='Connect BOTMOCS para bombar GUITZ', help=f'Usar: {prefix}guita para conectar BOTMOCS para bonmbar GUITZPIMS')
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def guita(ctx):
     url = randomline(".txt/guitz.txt")
     return await p(ctx=ctx, query=url)
   
 ####################----DC channel voice--------#############
-@client.command(brief='Disconnect BOTMOCS from channel')
+@client.command(brief='Disconnect BOTMOCS from channel',help=f'Usar: {prefix}dc para desconectar de um voice channel [necessário estar no vc]')
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def dc(ctx):
     try:
@@ -403,7 +429,7 @@ async def dc(ctx):
         await ctx.send("O BOT MOCS NÃO ESTÁ EM NENHUM CHANNEL")
 
 ############################----GALO----#########################
-@client.command(brief = 'Jogo do galo')
+@client.command(brief = 'Jogo do galo',help =f'Usar: {prefix}galo @user | {prefix}galo para começar um jogo do galo')
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def galo(ctx):
     if(listgalo.count(ctx.author) > 0):
@@ -455,10 +481,11 @@ async def galo(ctx):
     
     ############----COMEÇA A JOGAR O JOGO DO GALO ----############
     if(listgalo.count(player2) >0):
-        return await ctx.send(f"{player2.mention} já estás no meio de um jogo, acaba o jogo ou desiste")
+        return await ctx.send(f"{player2.mention} já estás no meio de um jogo, acaba o jogo ou desiste [{prefix}desisto]")
     listgalo.append(player1)
     listgalo.append(player2)
     await ctx.send(f"JOGO DO GALO : {player1.mention} vs {player2.mention}")
+    await ctx.send(f"```Para desistir usar o comando {prefix}desisto```")
     simbplayer1 = "🟢"
     simbplayer2 = "❌"
     array = init_galo()
@@ -582,7 +609,7 @@ async def print_galo(array, jogador, ctx):
     await ctx.send(embed=embed)
     
 ############----COIN----############
-@client.command(brief='cara ou coroa') #Flip that coin sis
+@client.command(brief='cara ou coroa',help=f"Usar: {prefix}coin para girar uma moeda") #Flip that coin sis
 async def coin(ctx):
     smile = '\N{SLIGHTLY SMILING FACE}'
     coroa = '\N{CROWN}'
@@ -593,7 +620,7 @@ async def coin(ctx):
         return await ctx.message.add_reaction(coroa)
 
 ###########----OFF----#############  
-@client.command(brief='shut down BOT MOCS') #Disconnect
+@client.command(brief='Admin CMD: SHUT DOWN',help='CMD para os desenvolvedores') #Disconnect
 async def off(ctx):
     # amaral e bruno autorizados
     if(ctx.author.id == 431857111018897409 or ctx.author.id == 366292034669248514):
@@ -611,7 +638,7 @@ async def off(ctx):
         await ctx.send("Não tens acesso a este codigo bem potente")
 
 ##############----DICE----#################
-@client.command(brief ='Guess the dice :p') #JOGA ESSE DADO
+@client.command(brief ='Guess the dice :p',help=f'Usar: {prefix}dice para começar o jogo') #JOGA ESSE DADO
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def dice(ctx):
 
@@ -637,7 +664,7 @@ async def dice(ctx):
             return await ctx.send(f"{ctx.author.mention} isso não é um numero nabo")
 
 #############----hello----################
-@client.command(brief='Saudações amigão') #Boas jovem
+@client.command(brief='Saudações amigão',help=f'Usar: {prefix}hello | {prefix}hello @user') #Boas jovem
 async def hello(ctx):
     try:
         member = ctx.message.mentions[0]
@@ -646,13 +673,13 @@ async def hello(ctx):
         await ctx.send(f'Olá, {ctx.author.mention}  :nerd:')
 
 ############----CONS(C)ELHO----#################
-@client.command(brief='Recebe ganda conselho') #Concelho master
+@client.command(brief='Recebe ganda conselho',help=f"Usar: {prefix}conselho para receber um conselho") #Concelho master
 async def conselho(ctx):
     frase = randomline(".txt/messages.txt")
     return await ctx.send(frase)
 
 #################----ping----#####################~
-@client.command(brief='ping do BOTMOCS') #Concelho master
+@client.command(brief='ping do BOTMOCS', help=f"Usar: {prefix}ping para ver o ping do botMOCS") 
 async def ping(ctx):
     await ctx.send(f'**Ping??** **Pong!** Latency: {round(client.latency * 1000)}ms')
 
