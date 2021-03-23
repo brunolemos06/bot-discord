@@ -308,14 +308,14 @@ async def p(ctx, *, query):
 
     if not ctx.message.author.voice:
         await ctx.send("Tens que tar conectado a um VoiceChannel BARRAQUEIRO YA")
-        return
-    
+        return  
     else:
-        channel = ctx.message.author.voice.channel
-    try:
-        await channel.connect()
-    except:
-        print("ja ca estava dentro mas vou por a tocar")
+        try:
+            channel = ctx.message.author.voice.channel
+            print("passou)
+            await channel.connect()
+        except:
+            print("ja ca estava dentro mas vou por a tocar")
 
     voice = get(client.voice_clients, guild=ctx.guild)
     #skip(com musicas)
