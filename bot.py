@@ -151,6 +151,8 @@ async def forca(ctx):
             return await ctx.send(f"NABOS. ja não há mais tentativas! A palavra era `{palavra}`")
         else:
             play = await client.wait_for('message', check=checkJogador)
+            if(play.content == prefix+"desisto"):
+                return await ctx.send("`Desistiram do jogo a palavra era -> "+palavra+"`")
             if (play.content.lower().strip() == palavra.lower().rstrip()):
                 xp = 12*tentativas-5
                 storeXP(str(play.author.id),xp)
