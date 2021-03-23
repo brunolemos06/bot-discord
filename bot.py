@@ -312,7 +312,7 @@ async def p(ctx, *, query):
     else:
         try:
             channel = ctx.message.author.voice.channel
-            print("passou)
+            print("passou")
             await channel.connect()
         except:
             print("ja ca estava dentro mas vou por a tocar")
