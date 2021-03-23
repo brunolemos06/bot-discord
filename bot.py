@@ -312,9 +312,9 @@ async def p(ctx, *, query):
     else:
         try:
             channel = ctx.message.author.voice.channel
-            print("passou")
             await channel.connect()
-        except:
+        except Exception as e:
+            print(e)
             print("ja ca estava dentro mas vou por a tocar")
 
     voice = get(client.voice_clients, guild=ctx.guild)
