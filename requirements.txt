@@ -1,0 +1,9 @@
+discord
+ffmpeg
+emoji
+youtube-dl
+PyNaCl
+dotenv
+asyncio
+time
+pyhton
