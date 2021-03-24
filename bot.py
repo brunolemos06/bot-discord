@@ -57,7 +57,7 @@ async def on_message(msg):
             emoji = '\N{DOUGHNUT}'
             await message.add_reaction(emoji)
         if "turbina" in msg.content.lower():
-            await msg.channel.send(file=discord.File('.png/turbina.PNG'))
+            await msg.channel.send(file=discord.File('.png/turbina.png'))
         if "satelite" in msg.content.lower():
             await msg.channel.send(file=discord.File('.png/satelite.png'))
         if ('cona' in msg.content.lower() or 'penis' in msg.content.lower() or 'pila' in msg.content.lower() or 'vagina' in msg.content.lower() or 'pipi' in msg.content.lower() or 'dick' in msg.content.lower() or 'pussy' in msg.content.lower() or 'piça' in msg.content.lower()) :
