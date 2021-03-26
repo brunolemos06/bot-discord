@@ -24,8 +24,8 @@ load_dotenv(dotenv_path)
 TOKEN_KEY = os.environ.get("TOKEN")
 APIKEY = os.environ.get("APIKEY")
 listgalo = []
-listmusics =[]
-listtitles = []
+listmusics ={}
+listtitles ={}
 listemojiAJ=["🇦","🇧","🇨","🇩","🇪","🇫","🇬","🇭","🇮","🇯"]
 prefix = "$"
 client = commands.Bot(command_prefix = prefix, case_insensitive = True)
@@ -49,7 +49,7 @@ async def on_message(msg):
             await msg.channel.send("NAO DIGAS ASNEIRAS NESTE DISCORD CARALHO, ESTAS TODO TURBINADO")
         if "che" in msg.content.lower():
             await msg.channel.send("CHE MADJÉ COTA MLINDRO VAI TE SUBIR LÁ HM")
-            message = await msg.channel.send(file=discord.File('.png/milindro.PNG'))
+            message = await msg.channel.send(file=discord.File('.png/milindro.png'))
             emoji = '\N{Heavy Black Heart}'
             await message.add_reaction(emoji)
             emoji = '\N{Smiling Face with Heart-Shaped Eyes}'
@@ -234,8 +234,12 @@ async def random(ctx):
 @client.command(brief="Limpa a queue", help=f"Usar: {prefix}clear para limpar a lista de musicas")
 @commands.cooldown(1,5, commands.BucketType.user)
 async def clear(ctx):
-    listmusics.clear()
-    listtitles.clear()
+    id = ctx.message.guild.id
+    try:
+        del(listmusics[id])
+        del(listtitles[id])
+    except:
+        return await ctx.send("`A queue já estava limpa`")
     return await ctx.send("```As músicas foram limpas BRO ao contrário do teu cu YA```")
 
 ###########----POLLS----############
@@ -280,11 +284,12 @@ async def remove(ctx, num):
 @client.command(brief="Mosta a queue de musicas a bombar", help=f"Usar: {prefix}queue, Lista de musicas prontas para bombar")
 @commands.cooldown(1,3,commands.BucketType.user)
 async def queue(ctx):
-    if(len(listtitles)!=0):
+    id = ctx.message.guild.id
+    if(id in listtitles and len(listtitles[id])!=0):
         embed = discord.Embed(title="Queue de músicas",description = "Lista de músicas na fila", color = discord.Colour.purple())
         embed.set_thumbnail(url="https://www.creativefabrica.com/wp-content/uploads/2019/02/Music-Icon-by-Kanggraphic-1-580x386.jpg")
         counter = 0
-        for x in listtitles:
+        for x in listtitles[id]:
             counter = counter + 1
             embed.add_field(name=str(counter), value=str(x), inline=False)
         return await ctx.send(embed=embed)
@@ -295,11 +300,13 @@ async def queue(ctx):
 @client.command(brief="TOCA O QUE quiseres bro", help=f"Usar: {prefix}play, Eu toco para ti o que tu quiseres lido")
 @commands.cooldown(1,2,commands.BucketType.user)
 async def p(ctx, *, query):
-    #skip sem nada na lista
-    if(query == "skip" and len(listmusics) == 0):
+    #id no server
+    #skip sem nada na list
+    id = ctx.message.guild.id
+    if(query == "skip" and id in listmusics and len(listmusics[id]) == 0):
         return await ctx.send("```CHE TAS TODO TURBINADO, não há nada para dar skip FOOL```")
     #remove sem nada na lista
-    if("remove" in query and len(listmusics) ==0):
+    if("remove" in query and  id in listmusics and len(listmusics[id]) ==0):
         return await ctx.send("```CHE GANDA NABO, não há nada para remover TONE```")
     #spotify playlist
     if("open.spotify.com" in query):
@@ -310,34 +317,34 @@ async def p(ctx, *, query):
 
     if not ctx.message.author.voice:
         await ctx.send("Tens que tar conectado a um VoiceChannel BARRAQUEIRO YA")
-        return  
+        return
+    
     else:
-        try:
-            channel = ctx.message.author.voice.channel
-            await channel.connect()
-        except Exception as e:
-            print(e)
-            print("ja ca estava dentro mas vou por a tocar")
+        channel = ctx.message.author.voice.channel
+    try:
+        await channel.connect()
+    except:
+        print("ja ca estava dentro mas vou por a tocar")
 
     voice = get(client.voice_clients, guild=ctx.guild)
     #skip(com musicas)
-    if(query == "skip" and len(listmusics)!=0 and len(listtitles)!= 0):
+    if(query == "skip" and  id in listmusics and  id in listtitles and len(listmusics[id])!=0 and len(listtitles[id])!= 0):
         voice.stop()
-        listmusics.remove(listmusics[0])
-        listtitles.remove(listtitles[0])
+        del(listmusics[id][0])
+        del(listtitles[id][0])
         return await play_next(voice, ctx)
     #remove
-    if("remove" in query and len(listmusics)!=0):
+    if("remove" in query and id in listmusics and len(listmusics[id])!=0):
         num = int(query.split(' ')[1])
         print(num)
         if(num-1 == 0):
             return await ctx.send("```BRO para remover a primeira musica faz $skip duh```")
         try:
-            titulo = listtitles[num-1]
+            titulo = listtitles[id][num-1]
         except IndexError:
             return await ctx.send("```MAS ESSA musica não existe YA```")
-        listtitles.remove(listtitles[num-1])
-        listmusics.remove(listmusics[num-1])
+        del(listtitles[id][num-1])
+        del(listmusics[id][num-1])
         msg = "```Música removida: " + titulo  + "```"
         return await ctx.send(msg)
     
@@ -350,13 +357,15 @@ async def p(ctx, *, query):
     await ctx.send("```" + msg + "```")
 
     #verifica se ja tem musicas na queue, adicionando se ja tiver
-    if(len(listmusics)!=0):
-        listmusics.append(url)
-        listtitles.append(str(video['title']))
+    if(id in listmusics and len(listmusics[id])!=0):
+        listmusics[id].append(url)
+        listtitles[id].append(str(video['title']))
     #se nao tiver, cria uma queue e põe a bombar
     else:
-        listmusics.append(url)
-        listtitles.append(str(video['title']))
+        cp = [url]
+        mp = [str(video['title'])]
+        listmusics[id] = cp
+        listtitles[id] = mp
         await play_next(voice, ctx)
 
     timer = 0
@@ -370,17 +379,18 @@ async def p(ctx, *, query):
             break
 
 async def play_next(voice, ctx):
-    print(len(listmusics))
-    while len(listmusics) != 0:
+    id = ctx.message.guild.id
+    print(len(listmusics[id]))
+    while len(listmusics[id]) != 0:
         print("vou tocar")
-        voice.play(listmusics[0], after=lambda e:print('done', e))
-        atual = "Now playing: " + listtitles[0]
+        voice.play(listmusics[id][0], after=lambda e:print('done', e))
+        atual = "Now playing: " + listtitles[id][0]
         await ctx.send("```" + atual + "```")
         while(voice.is_playing()):
             await sleep(1)
         try:
-            listmusics.remove(listmusics[0])
-            listtitles.remove(listtitles[0])
+            del(listmusics[id][0])
+            del(listtitles[id][0])
         except:
             pass
 
