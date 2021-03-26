@@ -443,14 +443,17 @@ async def guita(ctx):
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def dc(ctx):
     try:
-        if ctx.author.voice.channel and ctx.author.voice.channel == ctx.voice_client.channel:
-            server = ctx.message.guild.voice_client
-            await server.disconnect()
-            listmusics = []
+        if ctx.author.voice.channel:
+            if ctx.author.voice.channel == ctx.voice_client.channel:
+                server = ctx.message.guild.voice_client        
+                await server.disconnect()
+                listmusics = []
+            else:
+                return await ctx.send("`Tens que estar no mesmo canal que o BOT MOCS YA`")
         else:
-            await ctx.send("Tens que estar no mesmo canal que o BOT MOCS YA")
+            return await ctx.send("`Tens que estar no mesmo canal que o BOT MOCS YA`")
     except AttributeError:
-        await ctx.send("O BOT MOCS NÃO ESTÁ EM NENHUM CHANNEL")
+        return await ctx.send("`Tens que estar no mesmo canal que o BOT MOCS YA`")
 
 ############################----GALO----#########################
 @client.command(brief = 'Jogo do galo',help =f'Usar: {prefix}galo @user | {prefix}galo para começar um jogo do galo')
