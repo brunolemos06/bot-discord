@@ -76,11 +76,11 @@ async def on_message(msg):
 @commands.cooldown(1,5,commands.BucketType.user)
 async def temp(ctx,city):
     try:
-    temp,iconurl = InfoByCity(city,APIKEY)
-    embed = discord.Embed(title="Informação do tempo",description = f"Em {city}:", color = discord.Colour.blue())
-    embed.set_thumbnail(url=iconurl)
-    embed.add_field(name=f"Temperatura", value=f"{temp}", inline=False)
-    return await ctx.send(embed=embed)
+        temp,iconurl = InfoByCity(city,APIKEY)
+        embed = discord.Embed(title="Informação do tempo",description = f"Em {city}:", color = discord.Colour.blue())
+        embed.set_thumbnail(url=iconurl)
+        embed.add_field(name=f"Temperatura", value=f"{temp}", inline=False)
+        return await ctx.send(embed=embed)
     except:
         return await ctx.send("`Problemas de ligação, experimente outra cidade`")
 ##########----XP----##############
@@ -424,21 +424,21 @@ async def profile(ctx):
 @commands.cooldown(1,2, commands.BucketType.user)
 async def creditos(ctx):
     storeXP(ctx.author.id,1,ctx)
-     embed = discord.Embed(title="Créditos",description = "Cérebros por trás do BOTMOCS", color = discord.Colour.red())
-     embed.set_thumbnail(url="https://cdn.jornaldebrasilia.com.br/wp-content/uploads/2019/07/cerebro-1000x600.jpg")
-     embed.add_field(name="Programadores: ", value='\u200b', inline=True)
-     embed.add_field(name="João Amaral", value ='<@366292034669248514>', inline=True)
-     embed.add_field(name="Bruno Lemos", value ='<@431857111018897409>', inline=True)
-     embed.add_field(name="Agradecimentos: ", value='\u200b', inline=True)
-     embed.add_field(name="Pedro Rocha", value ='<@539520976577363981>', inline=True)
-     embed.add_field(name="André Clérigo", value ='<@239323719300939776>', inline=True)
-     await ctx.send(embed=embed)
+    embed = discord.Embed(title="Créditos",description = "Cérebros por trás do BOTMOCS", color = discord.Colour.red())
+    embed.set_thumbnail(url="https://cdn.jornaldebrasilia.com.br/wp-content/uploads/2019/07/cerebro-1000x600.jpg")
+    embed.add_field(name="Programadores: ", value='\u200b', inline=True)
+    embed.add_field(name="João Amaral", value ='<@366292034669248514>', inline=True)
+    embed.add_field(name="Bruno Lemos", value ='<@431857111018897409>', inline=True)
+    embed.add_field(name="Agradecimentos: ", value='\u200b', inline=True)
+    embed.add_field(name="Pedro Rocha", value ='<@539520976577363981>', inline=True)
+    embed.add_field(name="André Clérigo", value ='<@239323719300939776>', inline=True)
+    await ctx.send(embed=embed)
     
 ###############----GUITA----####################
 @client.command(brief='Connect BOTMOCS para bombar GUITZ', help=f'Usar: {prefix}guita para conectar BOTMOCS para bonmbar GUITZPIMS')
 @commands.cooldown(1, 2, commands.BucketType.user)
 async def guita(ctx):
-    storeXP(ctx.author.id,5,ctx)
+    storeXP(ctx.author.id,1,ctx)
     url = randomline(".txt/guitz.txt")
     return await p(ctx=ctx, query=url)
   
