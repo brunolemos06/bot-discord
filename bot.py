@@ -90,15 +90,18 @@ async def temp(ctx,city):
 @client.command(brief="Mostra os niveis das pessoas jogaDORAS", help=f"Uso : {prefix}xp ou {prefix}xp @user")
 @commands.cooldown(1,2,commands.BucketType.user)
 async def xp(ctx, mention:str=None):
-    niveis = readJSON()     
+    niveis = readJSON()
+    id = ctx.message.guild.id
+    if(not (str(id) in niveis)):
+        niveis[str(id)] = {}
     if mention == None:
         cont = 0
         embed = discord.Embed(title="MALTA PRO NO JOGO",description = "Níveis dos 7 melhores jogadores", color = discord.Colour.red())
         embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Video_game_controller_icon_designed_by_Maico_Amorim.svg/1200px-Video_game_controller_icon_designed_by_Maico_Amorim.svg.png")
-        ordenado = sorted(niveis, key=niveis.get, reverse=True)
+        ordenado = sorted(niveis[str(id)], key=niveis[str(id)].get, reverse=True)
         for user in ordenado:
             cont+=1
-            embed.add_field(name=f"Top {cont} - {niveis[user]} XP", value="<@"+user+">", inline=False)
+            embed.add_field(name=f"Top {cont} - {niveis[str(id)][user]} XP", value="<@"+user+">", inline=False)
             if(cont==7): break
     else:
         
@@ -106,7 +109,7 @@ async def xp(ctx, mention:str=None):
         if len(str(nome)) != 18 or nome == "816787135825838090":
             return await ctx.send("@ invalido ! Uso: $xp ou $xp @user")
         try:
-            xp = niveis[nome]
+            xp = niveis[str(id)][nome]
             embed = discord.Embed(title="GRANDE JOGADOR",description = "O Seu nivel de xp", color = discord.Colour.red())
             embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Video_game_controller_icon_designed_by_Maico_Amorim.svg/1200px-Video_game_controller_icon_designed_by_Maico_Amorim.svg.png")
             embed.add_field(name=f"{xp}XP", value="<@"+nome+">", inline=False)
@@ -123,7 +126,8 @@ async def xp(ctx, mention:str=None):
 async def forca(ctx):
     msg = await ctx.send("Quem quiser jogar a forca MOCADA reaja aí CHÉ yA em 7 segundos")
     await msg.add_reaction('✔️')
-    channel = client.get_channel(715512000720928779)
+    #channel = client.get_channel(715512000720928779)
+    channel = ctx.channel
     await sleep(7.0)
     message = await channel.fetch_message(msg.id)
     users = []
@@ -145,7 +149,7 @@ async def forca(ctx):
             for user in users:
                 if(user.id != 816787135825838090):
                     xp = 10*int(tentativas/2)
-                    storeXP(str(user.id),xp)
+                    storeXP(str(user.id),xp,ctx)
             return await ctx.send("`WINNER DINNER DA CHICKEN: "+ randomline(".txt/msgsPositivas.txt")+"`")
         elif(tentativas==0):
             return await ctx.send(f"NABOS. ja não há mais tentativas! A palavra era `{palavra}`")
@@ -155,10 +159,10 @@ async def forca(ctx):
                 return await ctx.send("`Desistiram do jogo a palavra era -> "+palavra+"`")
             if (play.content.lower().strip() == palavra.lower().rstrip()):
                 xp = 12*tentativas-5
-                storeXP(str(play.author.id),xp)
+                storeXP(str(play.author.id),xp,ctx)
                 for user in users:
                     if(user.id != 816787135825838090):
-                        storeXP(str(user.id),8)
+                        storeXP(str(user.id),8,ctx)
                 await ctx.send("```" + palavra + "```")
                 await ctx.send(f"FOda-sE este gajo é um MESTRE CONGRATS")
                 return await ctx.send(f"`Ganhaste{xp}XP !!`")
@@ -261,7 +265,7 @@ async def poll(ctx, *, params=None):
             embed.add_field(name = '\u200b', value=listemojiAJ[val] + " : " + f"{opts[val+1]}", inline=False)
         embed.add_field(name = '\u200b', value='\u200b', inline=False)
         msg = await ctx.send(embed=embed)
-        storeXP(ctx.author.id,5)
+        storeXP(ctx.author.id,5,ctx)
         for i in range(len(opts)-1):
             await msg.add_reaction(listemojiAJ[i])
         return
@@ -447,7 +451,7 @@ async def dc(ctx):
             if ctx.author.voice.channel == ctx.voice_client.channel:
                 server = ctx.message.guild.voice_client        
                 await server.disconnect()
-                listmusics = []
+                listmusics = {}
             else:
                 return await ctx.send("`Tens que estar no mesmo canal que o BOT MOCS YA`")
         else:
@@ -554,26 +558,26 @@ async def galo(ctx):
                 listgalo.remove(player1)
                 listgalo.remove(player2) 
                 if(current_player == player1):
-                    storeXP(str(player2.id),50)
+                    storeXP(str(player2.id),50,ctx)
                     return await ctx.send(f"Vencedor {player2.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
                 elif(current_player == player2):
-                    storeXP(str(player1.id),50)
+                    storeXP(str(player1.id),50,ctx)
                     return await ctx.send(f"Vencedor {player1.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==1):
             listgalo.remove(player1)
             listgalo.remove(player2) 
-            storeXP(str(player1.id),50)
+            storeXP(str(player1.id),50,ctx)
             return await ctx.send(f"Vencedor {player1.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==2):
             listgalo.remove(player1)
             listgalo.remove(player2) 
-            storeXP(str(player2.id),50)
+            storeXP(str(player2.id),50,ctx)
             return await ctx.send(f"Vencedor {player2.mention}, " + randomline(".txt/msgsPositivas.txt").lower())
         elif(check_end_galo(array,numjogadas)==0):
             listgalo.remove(player1)
             listgalo.remove(player2) 
-            storeXP(str(player1.id),15)
-            storeXP(str(player2.id),15)
+            storeXP(str(player1.id),15,ctx)
+            storeXP(str(player2.id),15,ctx)
             return await ctx.send(f"Empate entre {player1.mention} e {player2.mention}, Tentem de novo!!!")      
 def check_end_galo(array,numjogadas):
     #return 0 empate
@@ -682,7 +686,7 @@ async def dice(ctx):
         if (guess.content.isdigit()):
             if(int(guess.content) == answer):
                 xp = 20
-                storeXP(str(ctx.author.id),xp)
+                storeXP(str(ctx.author.id),xp,ctx)
                 frase = randomline(".txt/msgsPositivas.txt")
                 return await ctx.send(f"{frase}, GANHASTE `{xp}XP` ") 
             else:
