@@ -169,25 +169,25 @@ async def forca(ctx):
                 pos = [idx for idx, item in enumerate(palavra.lower()) if play.content.lower() in item]
                 msgList = list(msg)
                 if pos:
-                    if(play.content in usadas):
+                    if(play.content.lower() in usadas):
                         await ctx.send(f"`Letra já usada: Tens {tentativas} tentativas disponiveis`")
                     else:
-                        usadas.append(play.content)
+                        usadas.append(play.content.lower())
                     for p in pos:
-                        msgList[p] = play.content
+                        msgList[p] = play.content.lower()
                     msg = "".join(msgList)
                     await ctx.send(msg)  
                     text=""
                     k=0
                     for letra in usadas:
                         if(k==0):
-                            text+=letra
+                            text+=letra.lower()
                             k+=1
                         else:
                             text+=", "+letra
                     await ctx.send(f"Letras usadas: {text}") 
                 else:
-                    if(play.content in usadas ):
+                    if(play.content.lower() in usadas ):
                         await ctx.send(f"`Letra já usada: Tens {tentativas} tentativas disponiveis`") 
                     else:
                         usadas.append(play.content)
@@ -211,8 +211,11 @@ async def forca(ctx):
                     await ctx.send(f"Letras usadas: {text}")
 
 async def init_forca(ctx):
-    palavra = randomline(".txt/words.txt")
+    palavra = randomline(".txt/words2.txt")
     msg = ""
+    if("-" in palavra):
+        palavra = palavra.replace('\n','')
+    print(">"+palavra+"<")
     for x in range(len(palavra)):
         if(x==len(palavra)-1 and not "-" in palavra):
             break
