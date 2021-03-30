@@ -211,7 +211,7 @@ async def forca(ctx):
                     await ctx.send(f"Letras usadas: {text}")
 
 async def init_forca(ctx):
-    palavra = randomline(".txt/words2.txt")
+    palavra = randomline(".txt/words.txt")
     msg = ""
     if("-" in palavra):
         palavra = palavra.replace('\n','')
